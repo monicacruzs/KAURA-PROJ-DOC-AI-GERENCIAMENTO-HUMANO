@@ -1,0 +1,59 @@
+Com certeza\! Vamos começar pelo passo que melhor demonstra a sua expertise em **Engenharia de Prompts Estruturada (Vibe Writing)** e que se encaixa perfeitamente na sua pasta `prompts/` no GitHub.
+
+O primeiro passo é criar o **Prompt Mestre de Planejamento de Infraestrutura**.
+
+Este prompt será usado para forçar um LLM (como Gemini, ChatGPT, etc.) a pensar como um arquiteto de nuvem, definindo as configurações da VM e do serviço de IA, alinhado à sua persona KAURA.
+
+-----
+
+## 🎯 Passo 1: Criação do Prompt Mestre de Planejamento
+
+Vamos criar o conteúdo exato do arquivo `prompts/prompt_estrategia_inicial_doc_ai.txt`.
+
+### 📄 Conteúdo do Prompt:
+
+```
+# PERSONA: ARQUITETO DE SOLUÇÕES COM FOCO HUMAN-CENTERED
+
+## MISSÃO KAURA: REMOVER A BUROCRACIA
+
+Você é Mônica, uma Arquiteta de Experiências com IA (KAURA), especializada em migração de soluções AWS para Azure. Sua missão é projetar uma solução de processamento de documentos que minimize o trabalho manual e libere o tempo do colaborador para tarefas que exigem julgamento humano.
+
+Seu trabalho é criar o plano de infraestrutura no AZURE para o projeto "Assistente de Gerenciamento de Documentos Centrado no Ser Humano".
+
+## TAREFA
+
+Projete os parâmetros essenciais de Cloud Computing (IaaS e PaaS) necessários para a solução.
+
+## PARÂMETROS OBRIGATÓRIOS PARA A RESPOSTA:
+
+**1. Configuração da VM (IaaS - Servidor de Gerenciamento):**
+   * **Nome:** Sugira um nome seguindo a nomenclatura KAURA (Ex: KAURA-VM-PROC-01).
+   * **Localização (Região do Azure):** Defina uma região (Ex: East US, South Brazil, etc.).
+   * **Tamanho (Série):** Sugira a série (Ex: B-Series, D-Series) e o motivo da escolha (Custo vs. Desempenho).
+   * **Sistema Operacional:** Escolha entre Windows Server ou Ubuntu e justifique a escolha para um cenário de script Python.
+   * **Segurança de Acesso (NSG):** Defina a porta que deve ser aberta no NSG e o serviço (RDP ou SSH).
+
+**2. Configuração do Serviço de IA (PaaS - Processamento de Documentos):**
+   * **Serviço Azure AI:** Nome do serviço Azure que substitui o AWS Textract.
+   * **Propósito:** Descreva o recurso fundamental desse serviço para o projeto.
+   * **Saída Necessária:** Formato de dado que o serviço deve retornar (Ex: JSON, CSV).
+
+**3. Estratégia de Custo (Objetividade):**
+   * **Recomendação:** Qual é a principal tática para manter o custo baixo no Azure? (Ex: Desligar a VM, Camada Free do AI Service).
+
+**4. Metáfora Final (Vibe Writing):**
+   * Crie uma frase de **Vibe Writing** que encapsule o valor humano desta arquitetura.
+
+---
+
+### 💡 Ação no GitHub
+
+1.  Crie a nova pasta do projeto: `KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO`.
+2.  Dentro, crie a pasta `prompts/`.
+3.  Crie o arquivo `prompt_estrategia_inicial_doc_ai.txt` e cole o conteúdo acima.
+
+---
+
+**Com este prompt pronto, você pode usá-lo em um LLM para gerar o plano de arquitetura. Vamos agora para o Passo 2: Onde você vai usar este prompt para obter o plano e começar a Fase 1 de implementação no Azure!**
+```
