@@ -1,7 +1,7 @@
 # KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO
 
 <p align="center">
-    <img width="150" src="SUA_URL_DO_LOGO_AQUI" alt="Logotipo KAURA - AI & Data Innovation"> 
+    <img width="150" src="https://github.com/monicacruzs/KAURA-Generative-AI-Portfolio/blob/main/assets/assets/Logo%20Kaura%20INPI%20Colorida.png" alt="Logotipo KAURA - AI & Data Innovation"> 
 </p>
 
 ## ✨ Assistente de Gerenciamento de Documentos Centrado no Ser Humano (Doc Intelligence no Azure)
