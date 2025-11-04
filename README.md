@@ -48,8 +48,8 @@ O projeto foi segmentado para garantir entregas rápidas e demonstração contí
 
 | Fase | Foco Principal | Estimativa | Status |
 | :--- | :--- | :--- | :--- |
-| **Fase 1: Configuração da Nuvem** | Azure CLI: RG, Document Intelligence e VM. | 2 a 4 Horas | EM ANDAMENTO |
-| **Fase 2: Desenvolvimento** | Script Python: Autenticação, API Doc-Intel, Geração de CSV. | 3 a 6 Horas | PENDENTE |
+| **Fase 1: Configuração da Nuvem** |Azure CLI: RG e Document Intelligence (PaaS F0) | 2 a 4 Horas | CONCLUÍDA |
+| **Fase 2: Desenvolvimento** | VM, Script Python: Autenticação, API Doc-Intel, Geração de CSV. | 3 a 6 Horas | PENDENTE |
 | **Fase 3: Documentação & GitHub** | Finalização do README, organização das pastas e commit final. | 2 a 4 Horas | EM ANDAMENTO |
 
 ---
