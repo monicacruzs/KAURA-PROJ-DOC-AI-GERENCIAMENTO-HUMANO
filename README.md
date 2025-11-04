@@ -34,8 +34,6 @@ O projeto é construído em uma arquitetura híbrida de IaaS (Infraestrutura com
 
 #### ☁️ Plano de Arquitetura Azure: Visão Geral
 
-O plano detalhado da infraestrutura, projetado usando um LLM (Prompt Mestre), é:
-
 | Parâmetro | Configuração | Motivo Estratégico |
 | :--- | :--- | :--- |
 | **VM (IaaS)** | Série B2s (Burstable), SO Ubuntu, Porta 22 (SSH) | Melhor custo-benefício e eficiência para execução de scripts Python. |
@@ -60,6 +58,7 @@ O projeto foi segmentado para garantir entregas rápidas e demonstração contí
 
 Este repositório segue o **Padrão KAURA Unificado** para clareza e auditoria:
 
+* **`SETUP.md`**: O guia completo de provisionamento e **FinOps** (estratégia de custo).
 * `assets/`: Artefatos visuais e de branding.
 * `output/`: O produto final (CSV/JSON com dados extraídos).
 * `prompts/`: O Prompt Mestre usado para planejamento e arquitetura.
@@ -69,6 +68,31 @@ Este repositório segue o **Padrão KAURA Unificado** para clareza e auditoria:
 
 ## 💻 Próximo Passo de Implementação
 
-O **Grupo de Recursos (`RG-KAURA-DOC-AI`)** e o **Serviço de Document Intelligence (`doc-intel-kaura-proc`)** foram criados. O próximo passo é provisionar a VM e a Rede Virtual para a execução segura do script.
+O **Grupo de Recursos (`RG-KAURA-DOC-AI`)** e o **Serviço de Document Intelligence (`kaura-doc-ai-service-kaura`)** foram criados na Fase 1. O próximo passo é provisionar a VM e a Rede Virtual para a execução segura do script.
 
-**[LINK para o script de criação da VM na pasta `infra/` ou `code/`]**
+**Acesse o [SETUP.md] para iniciar a FASE 2 (Provisionamento IaaS e Início da Cobrança).**
+
+---
+
+## 👩‍💻 Expert (Contato)
+
+<p>
+    <img 
+      align=left 
+      margin=10 
+      width=80 
+      src=https://avatars.githubusercontent.com/u/71937997?v=4
+    />
+    <p>&nbsp&nbsp&nbspMônica Cruz<br>
+    &nbsp&nbsp&nbsp
+    <a href=https://github.com/monicacruzs>
+    GitHub</a>&nbsp;|&nbsp;
+    <a href=https://www.linkedin.com/in/m%C3%B4nicacruz/?locale=pt_BR>LinkedIn</a>
+&nbsp;|&nbsp;
+    <a href="SEU KAURA AQUI">
+    KAURA - AI & Data Innovation</a>
+&nbsp;|&nbsp;</p>
+</p>
+<br/><br/>
+<p>
+
