@@ -215,10 +215,54 @@ Ação:
 2. Crie e edite o arquivo YAML: nano .github/workflows/main.yml 
 3. Cole o código abaixo e salve (CTRL+X, S, ENTER).
 
-# CÓDIGO DO MAIN.YML (Workflow de CI/CD)
-# [COLAR CÓDIGO YAML AQUI]
-# (Seu código YAML do GitHub Actions completo)
-# ...
+```bash
+
+# CÓDIGO DO MAIN.YML (Workflow de CI/CD) :
+name: Document AI Execution - CI
+
+# Quando o workflow deve ser executado (a cada push na branch main)
+on:
+  push:
+    branches:
+      - main
+
+# Define os trabalhos (jobs) que o workflow deve executar
+jobs:
+  analyze-document:
+    # O ambiente onde o código será executado (ambiente Linux hospedado no GitHub)
+    runs-on: ubuntu-latest
+
+    # Variáveis de ambiente secretas (para o Azure)
+    env:
+      # O GitHub Actions NÃO LÊ o arquivo .env.
+      # Você precisa adicionar estas variáveis nas "Secrets" do seu repositório no GitHub.
+      AZURE_FORM_RECOGNIZER_ENDPOINT: ${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}
+      AZURE_FORM_RECOGNIZER_KEY: ${{ secrets.AZURE_FORM_RECOGNIZER_KEY }}
+
+    # As etapas (steps) para executar o código
+    steps:
+      # 1. Checkout: Clona o código do seu repositório
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Configura o Python: Garante que a versão correta do Python está instalada
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      # 3. Instala as dependências: Instala os pacotes necessários (do requirements.txt)
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      # 4. Executa o script principal: Roda o analyze_doc_ai.py
+      - name: Execute Document Analysis Script
+        run: |
+          python3 src/analyze_doc_ai.py
+    
+   ``` 
 
 ### 2.4. Envio do Código e Início do Pipeline (Git Push)
 
