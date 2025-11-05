@@ -122,7 +122,22 @@ Após a conclusão dos testes (Bloco 2), este é o passo mais crucial para cumpr
 3.1. Comando de Limpeza Total
 
 ```bash
+
 # -- COMANDO DE CUSTO ZERO FINAL --
 echo "Excluindo o Resource Group e TODOS os recursos dentro dele (VM, VNet, Document Intelligence, etc.)."
 az group delete --name $RESOURCE_GROUP_NAME --yes --no-wait
 ```
+### 2. Erro de Permissão do GitHub (Remote Rejected)
+
+#### Problema
+Ao tentar enviar o arquivo de workflow (`.github/workflows/main.yml`) para o GitHub, você pode receber um erro: `refusing to allow a Personal Access Token to create or update workflow... without 'workflow' scope`.
+
+#### Causa
+O Personal Access Token (PAT) usado como "senha" para o comando `git push` não possui a permissão especial (`scope`) de **`workflow`**. Essa permissão é necessária para modificar arquivos dentro da pasta `.github/workflows/`.
+
+#### Solução
+1.  Acesse as configurações do seu PAT no GitHub (Settings -> Developer Settings -> Personal Access Tokens).
+2.  Clique no token que você está usando (ou gere um novo se preferir).
+3.  Na seção **Scopes (Permissões)**, certifique-se de que a caixa **`workflow`** esteja marcada, **além** da permissão `repo` que já deve estar selecionada.
+4.  Clique em **Update Token** (Atualizar Token).
+5.  Execute o comando `git push origin main` novamente, usando o Token atualizado como senha.
