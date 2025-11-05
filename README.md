@@ -48,9 +48,9 @@ O projeto foi segmentado para garantir entregas rápidas e demonstração contí
 
 | Fase | Foco Principal | Estimativa | Status |
 | :--- | :--- | :--- | :--- |
-| **Fase 1: Configuração da Nuvem** |Azure CLI: RG e Document Intelligence (PaaS F0) | 2 a 4 Horas | CONCLUÍDA |
-| **Fase 2: Desenvolvimento** | VM, Script Python: Autenticação, API Doc-Intel, Geração de CSV. | 3 a 6 Horas | PENDENTE |
-| **Fase 3: Documentação & GitHub** | Finalização do README, organização das pastas e commit final. | 2 a 4 Horas | EM ANDAMENTO |
+| **Fase 1: Configuração da Nuvem** |Azure CLI: RG e Document Intelligence (PaaS F0) | 1 a 2 Horas | CONCLUÍDA |
+| **Fase 2: Desenvolvimento** | VM, Script Python: Autenticação, API Doc-Intel, Geração de CSV. | 1 a 62 Horas | CONCLUÍDA |
+| **Fase 3: Documentação & GitHub** | Finalização do README, organização das pastas e commit final. | 1 a 2 Horas | CONCLUÍDA |
 
 ---
 
@@ -64,14 +64,6 @@ Este repositório segue o **Padrão KAURA Unificado** para clareza e auditoria:
 * `prompts/`: O Prompt Mestre usado para planejamento e arquitetura.
 * `src/`: O script Python de integração com o Azure Document Intelligence (`analyze_doc_ai.py`).
 * `requirements.txt`: Lista de dependências Python para o GitHub Actions.
----
-
-## 💻 Próximo Passo de Implementação
-
-O **Grupo de Recursos (`RG-KAURA-DOC-AI`)** e o **Serviço de Document Intelligence (`kaura-doc-ai-service-kaura`)** foram criados na Fase 1. O próximo passo é provisionar a VM e a Rede Virtual para a execução segura do script.
-
-**Acesse o [SETUP.md] para iniciar a FASE 2 (Provisionamento IaaS e Início da Cobrança).**
-
 ---
 
 ## 👩‍💻 Expert (Contato)
