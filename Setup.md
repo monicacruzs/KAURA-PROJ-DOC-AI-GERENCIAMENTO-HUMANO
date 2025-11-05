@@ -294,6 +294,14 @@ Para enviar seu código da VM para o GitHub e disparar o pipeline de CI/CD, voc�
     # -- 3. Enviar. Use o PAT como a senha quando solicitado --
     git push origin main 
     ```
+Em Resumo:
+
+| Ação | Contexto de Execução | Documentação no SETUP.md |
+| :--- | :--- | :--- |
+| **Criação/Edição de Arquivos** | Dentro da VM (`nano`) | Instrução `nano` adicionada na FASE 2.3. |
+| **`git clone`** | Dentro da VM (via SSH) | Instrução de `git clone` na FASE 2.1. |
+| **`git push`** | Dentro da VM (via SSH) | Instrução de `git push` na FASE 2.4. |
+| **Repositório** | Criado previamente no GitHub Web | Subentendido pelo `git clone` e `git push`. |
 
 ---
 
