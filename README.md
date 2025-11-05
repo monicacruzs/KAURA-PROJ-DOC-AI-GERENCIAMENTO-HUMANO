@@ -58,12 +58,12 @@ O projeto foi segmentado para garantir entregas rápidas e demonstração contí
 
 Este repositório segue o **Padrão KAURA Unificado** para clareza e auditoria:
 
+* **`.gitignore`**: **CRUCIAL** para segurança. Garante que as chaves (Keys) e variáveis de ambiente nunca sejam enviadas ao GitHub.
 * **`SETUP.md`**: O guia completo de provisionamento e **FinOps** (estratégia de custo).
-* `assets/`: Artefatos visuais e de branding.
-* `output/`: O produto final (CSV/JSON com dados extraídos).
+* `assets/`: Artefatos visuais e a imagem de teste usada pelo CI/CD (`lista-material-escolar.jpeg`).
 * `prompts/`: O Prompt Mestre usado para planejamento e arquitetura.
-* `code/`: O script Python de integração com o Azure Document Intelligence.
-
+* `src/`: O script Python de integração com o Azure Document Intelligence (`analyze_doc_ai.py`).
+* `requirements.txt`: Lista de dependências Python para o GitHub Actions.
 ---
 
 ## 💻 Próximo Passo de Implementação
