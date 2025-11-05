@@ -116,16 +116,42 @@ az vm create \
 echo "VM Criada! Obtendo o IP Público (Para SSH):"
 az vm show -d --resource-group $RESOURCE_GROUP_NAME --name $VM_NAME --query publicIps -o tsv
 ```
-3. FASE 3: DESPROVISIONAMENTO (CUSTO ZERO FINAL)
-Após a conclusão dos testes (Bloco 2), este é o passo mais crucial para cumprir a meta FinOps de custo zero. Ele apaga TUDO o que foi criado no grupo de recursos.
 
-3.1. Comando de Limpeza Total
+## 3. FASE 3: DESPROVISIONAMENTO E ESTRATÉGIA FINOPS (CUSTO ZERO ESTRUTURAL)
+
+Esta é a estratégia de **FinOps** que garante o custo zero para o projeto. Ela elimina os únicos recursos que geram cobrança persistente (VM, Disco de S.O. e IP Público Standard), mantendo o serviço de **Document Intelligence F0 (GRÁTIS)** para futuros testes.
+
+* **Recursos Mantidos (Custo Zero):** Document Intelligence F0, VNet, NSG.
+* **Recursos Excluídos (Custo Eliminado):** Máquina Virtual (VM), Disco do S.O. e IP Público Standard.
+
+### 3.1. Ação de Custo Zero (Método Recomendado: Portal do Azure)
+
+Devido à inconsistência do Azure CLI em excluir recursos de armazenamento e rede, o método mais seguro para garantir o Custo Zero é a exclusão manual via Portal:
+
+1.  **Excluir a VM:** Navegue até **Virtual Machines** e delete `KAURA-VM-PROC-01`. (Se ela já estiver como `Stopped (deallocated)`, a cobrança de computação já parou).
+2.  **Excluir o IP Público:** Navegue até **Public IP addresses** e delete o recurso `KAURA-VM-PROC-01PublicIp`. (Este é o último custo de rede).
+3.  **Excluir o Disco:** Navegue até **Disks** e delete o disco de S.O. (`KAURA-VM-PROC-01_OsDisk_1_...`) se ele não tiver sido excluído automaticamente. (Este é o último custo de armazenamento).
+
+> ℹ️ **DICA:** Você pode verificar a lista final de recursos no Resource Group `RG-KAURA-DOC-AI` para garantir que apenas os itens de Custo Zero (Document Intelligence, VNet, NSG) permaneçam.
+
+> 💡 **Nota Arquitetural (SSH e Custo Zero):** O SSH e o IP Público **foram eliminados** porque a execução do código foi migrada para o **GitHub Actions (CI/CD)**. O CI/CD usa **runners efêmeros** (máquinas virtuais temporárias gerenciadas pelo GitHub), que eliminam a necessidade de manter e pagar por uma VM persistente (IaaS), garantindo o **Custo Zero Estrutural** e a automação do pipeline.
+
+### 3.2. Acesso às Credenciais (Para Próximos Testes)
+
+Se você precisar do Endpoint ou das Keys para reconfigurar um teste futuro (local ou no CI/CD):
+
+1.  Navegue até o Resource Group `RG-KAURA-DOC-AI` no Portal do Azure.
+2.  Clique no serviço **Document Intelligence** (o nome atualizado é `kaura-doc-ai-service-05`).
+3.  As credenciais estarão na seção **Keys and Endpoint**.
+
+### 3.3. Opção: Limpeza Total (Excluir Resource Group)
+
+Para zerar *absolutamente* o custo e deletar **TODOS** os recursos, execute este comando no Azure CLI. Ele excluirá o Document Intelligence F0 e todos os demais recursos:
 
 ```bash
-
-# -- COMANDO DE CUSTO ZERO FINAL --
-echo "Excluindo o Resource Group e TODOS os recursos dentro dele (VM, VNet, Document Intelligence, etc.)."
-az group delete --name $RESOURCE_GROUP_NAME --yes --no-wait
+echo "Excluindo o Resource Group e TODOS os recursos dentro dele."
+# Usamos o nome fixo para máxima robustez
+az group delete --name RG-KAURA-DOC-AI --yes --no-wait
 ```
 
 ## ⚠️ Solução de Problemas Comuns (Troubleshooting):
