@@ -150,7 +150,77 @@ dados/
 
 ```
 
-### 2.3. Envio do Código e Início do Pipeline (Git Push)
+### 2.3. Criação dos Arquivos de Código e Automação (CI/CD)
+
+**Contexto:** Estes arquivos devem ser criados na sua VM (acessada via SSH) para que você possa enviá-los ao GitHub. Utilize o editor de texto `nano` para criar/editar os arquivos. Este script é o coração do projeto. Ele se conecta ao Azure Document Intelligence, processa o documento de teste (`assets/lista-material-escolar.jpeg`) e imprime os resultados.
+
+#### 2.3.1. Script Python (`src/analyze_doc_ai.py`)
+
+Este script é o coração do projeto. Ele se conecta ao Azure Document Intelligence, processa o documento de teste, e imprime os resultados.
+
+**Ação:** 1. Crie a pasta `src/`: `mkdir src`
+2. Crie e edite o arquivo Python: `nano src/analyze_doc_ai.py`
+3. Cole o código abaixo e salve (CTRL+X, S, ENTER).
+
+```python
+# CÓDIGO DO ANALYZE_DOC_AI.PY (Substitua pelo seu código final de análise)
+# (Este bloco deve conter o código Python que usa as variáveis de ambiente)
+# Exemplo básico de estrutura:
+
+import os
+from azure.ai.formrecognizer import DocumentAnalysisClient
+from azure.core.credentials import AzureKeyCredential
+
+# 1. Variáveis de Ambiente (Configuradas no GitHub Secrets)
+endpoint = os.environ.get("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT")
+key = os.environ.get("AZURE_DOCUMENT_INTELLIGENCE_KEY")
+document_path = os.path.join("assets", "lista-material-escolar.jpeg")
+
+if not endpoint or not key:
+    print("ERRO: Credenciais não encontradas. Verifique o GitHub Secrets.")
+    exit(1)
+
+# 2. Conexão com o Azure
+document_analysis_client = DocumentAnalysisClient(
+    endpoint=endpoint, credential=AzureKeyCredential(key)
+)
+
+# 3. Análise do Documento
+print(f"Iniciando análise do documento: {document_path}")
+
+try:
+    with open(document_path, "rb") as f:
+        poller = document_analysis_client.begin_analyze_document(
+            "prebuilt-document", document=f.read() # Use seu modelo customizado ou prebuilt
+        )
+    result = poller.result()
+    
+    # 4. Impressão dos Resultados
+    print("--- RESULTADO DA ANÁLISE ---")
+    for doc in result.documents:
+        print(f"Tipo de Documento: {doc.doc_type}")
+        # A lógica de extração detalhada deve ir aqui
+        
+except FileNotFoundError:
+    print(f"ERRO: Arquivo não encontrado em {document_path}. Verifique a pasta assets.")
+
+# FIM DO CÓDIGO PYTHON
+```
+#### 2.3.2. Arquivo de Workflow (.github/workflows/main.yml)
+
+Este arquivo define o pipeline que o GitHub Actions executará a cada git push.
+
+Ação: 
+1. Crie a pasta do workflow: mkdir -p .github/workflows 
+2. Crie e edite o arquivo YAML: nano .github/workflows/main.yml 
+3. Cole o código abaixo e salve (CTRL+X, S, ENTER).
+
+# CÓDIGO DO MAIN.YML (Workflow de CI/CD)
+# [COLAR CÓDIGO YAML AQUI]
+# (Seu código YAML do GitHub Actions completo)
+# ...
+
+### 2.4. Envio do Código e Início do Pipeline (Git Push)
 
 Agora que todos os arquivos necessários (código em `src/`, workflow em `.github/`, dependências em `requirements.txt`, e o arquivo de segurança `.gitignore`) estão prontos, o último passo é enviá-los ao GitHub para disparar o pipeline de CI/CD.
 
