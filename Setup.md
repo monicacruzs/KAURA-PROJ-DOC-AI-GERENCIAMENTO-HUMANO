@@ -58,7 +58,7 @@ az cognitiveservices account keys list \
     --resource-group $RESOURCE_GROUP_NAME \
     --query key1 -o tsv
 ```
-. FASE 2: PROVISIONAMENTO IaaS (VM) E EXECUÇÃO (2 HORAS)
+## FASE 2: PROVISIONAMENTO IaaS (VM) E EXECUÇÃO (2 HORAS)
 ⚠️ ALERTA DE CUSTO: O custo da Máquina Virtual Standard_B2s inicia no momento em que o comando az vm create é executado.
 
 2.1. Criação da VM e Rede
@@ -116,6 +116,72 @@ az vm create \
 echo "VM Criada! Obtendo o IP Público (Para SSH):"
 az vm show -d --resource-group $RESOURCE_GROUP_NAME --name $VM_NAME --query publicIps -o tsv
 ```
+
+### 2.2. Configuração de Segurança: Criando o `.gitignore`
+
+**⚠️ CRUCIAL: SEGURANÇA**
+
+Para evitar que chaves secretas do Azure, Tokens ou variáveis de ambiente sejam acidentalmente enviados ao GitHub, você deve criar um arquivo de exclusão.
+
+**Ação:** Crie o arquivo **`.gitignore`** na **raiz** do seu repositório com o seguinte conteúdo:
+
+Conteúdo do .gitignore:
+
+```bash
+# Configurações Essenciais de Segurança e Ambiente
+
+# Variáveis de Ambiente e Chaves (Crucial para Azure Secrets!)
+.env
+.local
+*.json.local
+
+# Ambientes Python e Cache
+__pycache__/
+*.pyc
+venv/
+.pytest_cache/
+
+# Arquivos de Sistema Ocultos
+.DS_Store
+
+# Saídas do Projeto (O GitHub Actions pode gerar)
+output/
+dados/
+
+```
+
+### 2.3. Envio do Código e Início do Pipeline (Git Push)
+
+Agora que todos os arquivos necessários (código em `src/`, workflow em `.github/`, dependências em `requirements.txt`, e o arquivo de segurança `.gitignore`) estão prontos, o último passo é enviá-los ao GitHub para disparar o pipeline de CI/CD.
+
+Para enviar seu código da VM para o GitHub e disparar o pipeline de CI/CD, você precisa se autenticar e configurar quem está fazendo o commit.
+
+**⚠️ Autenticação (SENHA):** A senha usada no `git push` não é sua senha do GitHub, mas sim o seu **Personal Access Token (PAT)**.
+
+> **💡 Como Obter/Gerar o PAT:** Se você não souber como gerar ou configurar seu PAT, consulte a seção **FASE 4: Troubleshooting**, item 2 (**"Erro de Permissão do GitHub"**) para o passo a passo completo. Lembre-se de dar a permissão (`scope`) de **`workflow`** ao seu token.
+
+1.  **Configurar Identidade Global (Uma Vez por VM):**
+
+    ```bash
+    # Substitua pelas suas credenciais do GitHub
+    git config --global user.email "SEU_EMAIL_GITHUB"
+    git config --global user.name "SEU_USUARIO_GITHUB"
+    ```
+
+2.  **Enviar para o GitHub (Dispara o CI/CD!):**
+
+    ```bash
+    # -- 1. Adicionar todos os arquivos ao rastreamento do Git --
+    git add .
+
+    # -- 2. Criar o commit de finalização do ambiente --
+    git commit -m "feat: Adicionado pipeline CI/CD, script Python e documentacao final."
+
+    # -- 3. Enviar. Use o PAT como a senha quando solicitado --
+    git push origin main 
+    ```
+
+---
 
 ## 3. FASE 3: DESPROVISIONAMENTO E ESTRATÉGIA FINOPS (CUSTO ZERO ESTRUTURAL)
 
