@@ -20,7 +20,7 @@ document_analysis_client = DocumentAnalysisClient(
 )
 
 # 2. Defina o caminho para o seu documento (caminho padrão do repositório)
-document_path = "dados/lista-material-escolar.jpeg"
+document_path = "assets/lista-material-escolar.jpeg"
 
 if not os.path.exists(document_path):
     print(f"ERRO: Arquivo de documento não encontrado no caminho: {document_path}")
