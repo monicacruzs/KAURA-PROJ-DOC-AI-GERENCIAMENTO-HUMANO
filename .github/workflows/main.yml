@@ -41,4 +41,4 @@ jobs:
       # 4. Executa o script principal: Roda o analyze_doc_ai.py
       - name: Execute Document Analysis Script
         run: |
-          python3 analyze_doc_ai.py
+          python3 src/analyze_doc_ai.py
