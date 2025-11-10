@@ -1,58 +1,66 @@
-# Nome do workflow (aparece no GitHub Actions)
+# Nome do workflow
 name: Document AI Execution - CI
 
-# Quando o workflow deve ser executado (a cada push na branch main)
+# Gatilho: Executar em qualquer push para a branch main
 on:
   push:
     branches:
       - main
 
-# Define os trabalhos (jobs) que o workflow deve executar
+# Define os trabalhos (jobs) separados
 jobs:
-  analyze-document:
-    # O ambiente onde o código será executado (ambiente Linux hospedado no GitHub)
+  # Job 1: Projeto KAURA-DOC-AI-FIN (Faturas)
+  analyze-invoice:
+    name: 📊 Projeto 2 - Analisar Faturas
     runs-on: ubuntu-latest
-
-    # Variáveis de ambiente secretas (para o Azure)
+    
+    # Variáveis de ambiente (Secrets) apenas para este Job
     env:
-      # O GitHub Actions NÃO LÊ o arquivo .env.
-      # Você precisa adicionar estas variáveis nas "Secrets" do seu repositório no GitHub.
       AZURE_FORM_RECOGNIZER_ENDPOINT: ${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}
       AZURE_FORM_RECOGNIZER_KEY: ${{ secrets.AZURE_FORM_RECOGNIZER_KEY }}
 
-    # As etapas (steps) para executar o código
     steps:
-      # 1. Checkout: Clona o código do seu repositório
-      - name: Checkout code
+      - name: 1. Checkout code
         uses: actions/checkout@v4
 
-      # 2. Configura o Python: Garante que a versão correta do Python está instalada
-      - name: Set up Python
+      - name: 2. Set up Python and Install dependencies
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-
-      # 3. Instala as dependências: Instala os pacotes necessários (do requirements.txt)
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
+      - run: pip install -r requirements.txt
           
-     # 4. Executa o script principal (Projeto 2: Faturas)
-      - name: 4. Execute Document Analysis Script (Projeto 2)
-        # Usa o parâmetro --model-id para executar o modo de extração de fatura
-        # O script Python gerará o arquivo dados_fatura_extraidos.json neste passo.
-        run: |
-          python3 src/analyze_doc_ai.py --model-id prebuilt-invoice
+      # 3. Execução do Projeto 2
+      - name: 3. Execute Fatura Analysis Script
+        run: python3 src/analyze_doc_ai.py --model-id prebuilt-invoice
 
-      # 5. Salva o Output como Artefato
-      - name: 5. Upload Output Artifact (JSON) 📦
-        # Ação oficial para salvar arquivos.
+      # 4. Upload do Artefato JSON (Output persistido)
+      - name: 4. Upload Output Artifact (JSON) 📦
         uses: actions/upload-artifact@v4
         with:
-          # Nome do Artefato na página de resumo da execução
           name: kaura-proj2-fatura-output-${{ github.run_id }}
-          # O caminho (path) deve ser o nome do arquivo gerado pelo script Python
           path: dados_fatura_extraidos.json           
-          # Define o tempo de retenção do arquivo no GitHub (em dias)
           retention-days: 7
+          
+  # Job 2: Projeto DOC-AI-HUMANO (Layout/OCR)
+  analyze-layout:
+    name: 📝 Projeto 1 - Analisar Layout/OCR
+    runs-on: ubuntu-latest
+    
+    # Variáveis de ambiente (Secrets) apenas para este Job
+    env:
+      AZURE_FORM_RECOGNIZER_ENDPOINT: ${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}
+      AZURE_FORM_RECOGNIZER_KEY: ${{ secrets.AZURE_FORM_RECOGNIZER_KEY }}
+      
+    steps:
+      - name: 1. Checkout code
+        uses: actions/checkout@v4
+
+      - name: 2. Set up Python and Install dependencies
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: pip install -r requirements.txt
+
+      # 3. Execução do Projeto 1 (Output vai para os logs)
+      - name: 3. Execute Layout Analysis Script
+        run: python3 src/analyze_doc_ai.py --model-id prebuilt-layout
