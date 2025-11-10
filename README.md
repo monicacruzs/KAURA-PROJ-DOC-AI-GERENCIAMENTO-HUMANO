@@ -14,17 +14,32 @@ Este projeto demonstra a construção de uma solução de **Processamento Inteli
 
 ### 🎯 Proposta de Valor KAURA: A Essência do Projeto
 
-O problema humano é claro: digitar dados de faturas ou contratos é tedioso e propenso a erros, desviando o foco do colaborador de tarefas mais estratégicas.
+O problema humano é claro: digitar dados de faturas ou contratos é tedioso e propenso a erros, desviando o foco do colaborador de tarefas mais estratégicas. A IA atua como o **"Filtro Inteligente"** que remove o ruído burocrático e repetitivo dos documentos, liberando o tempo do colaborador para tarefas que exigem **julgamento humano e empatia**.
 
-#### Metáfora Central (Vibe Writing)
+---
 
-A IA atua como o **"Filtro Inteligente"** que remove o ruído burocrático e repetitivo dos documentos, liberando o tempo do colaborador para tarefas que exigem **julgamento humano e empatia**. Construímos a ponte da máquina para a mente, transformando papéis em tempo livre para o que realmente importa.
+## 🚀 Projetos Atuais (Modelos Unificados e CI/CD)
+
+Todos os projetos utilizam o script principal **`analyze_doc_ai.py`** e o parâmetro `--model-id` para selecionar a funcionalidade de análise de documentos (Azure Document Intelligence). O processamento é executado em um pipeline de **Custo Zero Estrutural (FinOps)** via GitHub Actions.
+
+| Projeto | Nome | Objetivo Principal | Modelo Azure DI | Script de Execução | Output Persistido |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Projeto 1** | DOC-AI-HUMANO | Extração de **texto bruto e layout** para validação de OCR. | `prebuilt-layout` | `--model-id prebuilt-layout` | Logs (Console) |
+| **Projeto 2** | **KAURA-DOC-AI-FIN** | **Automatizar a extração de dados financeiros de Faturas (InvoiceId, Total, Cliente).** | **`prebuilt-invoice`** | **`--model-id prebuilt-invoice`** | **JSON (Artefato)** |
+
+### ⚙️ Execução e Acesso ao Output (CI/CD)
+
+A arquitetura de processamento de documentos é Serverless/On-Demand via **GitHub Actions**.
+
+1.  **Gatilho:** O *workflow* é acionado por qualquer `git push` para a *branch* `main`.
+2.  **Credenciais:** As chaves do Azure são injetadas com segurança via **GitHub Secrets** (`AZURE_FORM_RECOGNIZER_ENDPOINT`, `AZURE_FORM_RECOGNIZER_KEY`).
+3.  **Output (Projeto 2):** O resultado em JSON da fatura é salvo como um **Artefato** na página de resumo da execução, permitindo o download direto do resultado (ex: `kaura-proj2-fatura-output-XXXXX.zip`).
 
 ---
 
 ### 🏗️ Arquitetura e Conceitos do Azure Demonstrados
 
-O projeto é construído em uma arquitetura híbrida de IaaS (Infraestrutura como Serviço) e PaaS (Plataforma como Serviço), demonstrando proficiência em:
+O projeto é construído em uma arquitetura híbrida de IaaS e PaaS, demonstrando proficiência em:
 
 | Conceito | Componente no Azure | Habilidade Comprovada |
 | :--- | :--- | :--- |
@@ -48,8 +63,8 @@ O projeto foi segmentado para garantir entregas rápidas e demonstração contí
 
 | Fase | Foco Principal | Estimativa | Status |
 | :--- | :--- | :--- | :--- |
-| **Fase 1: Configuração da Nuvem** |Azure CLI: RG e Document Intelligence (PaaS F0) | 1 a 2 Horas | CONCLUÍDA |
-| **Fase 2: Desenvolvimento** | VM, Script Python: Autenticação, API Doc-Intel, Geração de CSV. | 1 a 62 Horas | CONCLUÍDA |
+| **Fase 1: Configuração da Nuvem** | Azure CLI: RG e Document Intelligence (PaaS F0) | 1 a 2 Horas | CONCLUÍDA |
+| **Fase 2: Desenvolvimento** | VM, Script Python: Autenticação, API Doc-Intel, Geração de CSV. | 1 a 2 Horas | CONCLUÍDA |
 | **Fase 3: Documentação & GitHub** | Finalização do README, organização das pastas e commit final. | 1 a 2 Horas | CONCLUÍDA |
 
 ---
@@ -60,10 +75,12 @@ Este repositório segue o **Padrão KAURA Unificado** para clareza e auditoria:
 
 * **`.gitignore`**: **CRUCIAL** para segurança. Garante que as chaves (Keys) e variáveis de ambiente nunca sejam enviadas ao GitHub.
 * **`SETUP.md`**: O guia completo de provisionamento e **FinOps** (estratégia de custo).
-* `assets/`: Artefatos visuais e a imagem de teste usada pelo CI/CD (`lista-material-escolar.jpeg`).
+* **`dados/`**: Contém os arquivos de teste (ex: `fatura-teste.pdf`) usados pelo pipeline de CI/CD.
+* `assets/`: Artefatos visuais e a imagem de teste usada pelo CI/CD.
 * `prompts/`: O Prompt Mestre usado para planejamento e arquitetura.
 * `src/`: O script Python de integração com o Azure Document Intelligence (`analyze_doc_ai.py`).
 * `requirements.txt`: Lista de dependências Python para o GitHub Actions.
+
 ---
 
 ## 👩‍💻 Expert (Contato)
@@ -87,4 +104,3 @@ Este repositório segue o **Padrão KAURA Unificado** para clareza e auditoria:
 </p>
 <br/><br/>
 <p>
-
