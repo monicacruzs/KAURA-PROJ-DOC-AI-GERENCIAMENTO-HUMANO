@@ -41,7 +41,7 @@ jobs:
           path: dados_fatura_extraidos.json           
           retention-days: 7
           
-  # Job 2: Projeto DOC-AI-HUMANO (Layout/OCR)
+ # Job 2: Projeto DOC-AI-HUMANO (Layout/OCR)
   analyze-layout:
     name: 📝 Projeto 1 - Analisar Layout/OCR
     runs-on: ubuntu-latest
@@ -52,15 +52,23 @@ jobs:
       AZURE_FORM_RECOGNIZER_KEY: ${{ secrets.AZURE_FORM_RECOGNIZER_KEY }}
       
     steps:
+      # 1 & 2. Checkout, Setup Python, Instalação
       - name: 1. Checkout code
         uses: actions/checkout@v4
-
       - name: 2. Set up Python and Install dependencies
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
       - run: pip install -r requirements.txt
 
-      # 3. Execução do Projeto 1 (Output vai para os logs)
+      # 3. Execução do Projeto 1 (Gera o dados_layout_extraidos.txt)
       - name: 3. Execute Layout Analysis Script
         run: python3 src/analyze_doc_ai.py --model-id prebuilt-layout
+
+      # 4. Upload do Artefato TXT (Output persistido)
+      - name: 4. Upload Output Artifact (TXT) 📦
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaura-proj1-layout-output-${{ github.run_id }}
+          path: dados_layout_extraidos.txt           
+          retention-days: 7
