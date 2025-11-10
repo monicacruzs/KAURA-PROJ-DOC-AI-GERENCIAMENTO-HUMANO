@@ -38,7 +38,21 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install -r requirements.txt
           
-      # 4. Executa o script principal: Roda o analyze_doc_ai.py
-      - name: Execute Document Analysis Script
+     # 4. Executa o script principal (Projeto 2: Faturas)
+      - name: 4. Execute Document Analysis Script (Projeto 2)
+        # Usa o parâmetro --model-id para executar o modo de extração de fatura
+        # O script Python gerará o arquivo dados_fatura_extraidos.json neste passo.
         run: |
-          python3 src/analyze_doc_ai.py
+          python3 analyze_doc_ai.py --model-id prebuilt-invoice
+
+      # 5. Salva o Output como Artefato
+      - name: 5. Upload Output Artifact (JSON) 📦
+        # Ação oficial para salvar arquivos.
+        uses: actions/upload-artifact@v4
+        with:
+          # Nome do Artefato na página de resumo da execução
+          name: kaura-proj2-fatura-output-${{ github.run_id }}
+          # O caminho (path) deve ser o nome do arquivo gerado pelo script Python
+          path: dados_fatura_extraidos.json           
+          # Define o tempo de retenção do arquivo no GitHub (em dias)
+          retention-days: 7
