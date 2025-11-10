@@ -6,7 +6,7 @@
 
 ## ✨ Assistente de Gerenciamento de Documentos Centrado no Ser Humano (Doc Intelligence no Azure)
 
-> 🧠 **HeadLine:** **Migração Estratégica para Azure: Pipeline de Processamento de Documentos, Foco em Automação e Redução da Carga Burocrática.**
+> 🧠 **Headline:** **Migração Estratégica para Azure: Pipeline de Processamento de Documentos, Foco em Automação e Redução da Carga Burocrática.**
 
 Este projeto demonstra a construção de uma solução de **Processamento Inteligente de Documentos (IDP)**, migrando conceitos de OCR avançado para a plataforma Azure. O foco metodológico é o **Impacto Humano (KAURA)**: usar a IA para eliminar tarefas tediosas e liberar o tempo do colaborador para o **julgamento humano e a empatia**.
 
@@ -20,11 +20,11 @@ O problema humano é claro: digitar dados de faturas ou contratos é tedioso e p
 
 ## 🚀 Projetos Atuais (Modelos Unificados e CI/CD)
 
-Todos os projetos utilizam o script principal **`analyze_doc_ai.py`** e o parâmetro `--model-id` para selecionar a funcionalidade de análise de documentos (Azure Document Intelligence). O processamento é executado em um pipeline de **Custo Zero Estrutural (FinOps)** via GitHub Actions.
+Todos os projetos utilizam o script principal **`analyze_doc_ai.py`** e o parâmetro `--model-id` para selecionar a funcionalidade de análise de documentos (Azure Document Intelligence). O processamento é executado em um pipeline de **Custo Zero Estrutural (FinOps)** via **GitHub Actions** em *Jobs* separados.
 
 | Projeto | Nome | Objetivo Principal | Modelo Azure DI | Script de Execução | Output Persistido |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Projeto 1** | DOC-AI-HUMANO | Extração de **texto bruto e layout** para validação de OCR. | `prebuilt-layout` | `--model-id prebuilt-layout` | Logs (Console) |
+| **Projeto 1** | DOC-AI-HUMANO | Extração de **texto bruto e layout** para validação de OCR. | `prebuilt-layout` | `--model-id prebuilt-layout` | **TXT (Artefato)** |
 | **Projeto 2** | **KAURA-DOC-AI-FIN** | **Automatizar a extração de dados financeiros de Faturas (InvoiceId, Total, Cliente).** | **`prebuilt-invoice`** | **`--model-id prebuilt-invoice`** | **JSON (Artefato)** |
 
 ### ⚙️ Execução e Acesso ao Output (CI/CD)
@@ -32,8 +32,9 @@ Todos os projetos utilizam o script principal **`analyze_doc_ai.py`** e o parâm
 A arquitetura de processamento de documentos é Serverless/On-Demand via **GitHub Actions**.
 
 1.  **Gatilho:** O *workflow* é acionado por qualquer `git push` para a *branch* `main`.
-2.  **Credenciais:** As chaves do Azure são injetadas com segurança via **GitHub Secrets** (`AZURE_FORM_RECOGNIZER_ENDPOINT`, `AZURE_FORM_RECOGNIZER_KEY`).
-3.  **Output (Projeto 2):** O resultado em JSON da fatura é salvo como um **Artefato** na página de resumo da execução, permitindo o download direto do resultado (ex: `kaura-proj2-fatura-output-XXXXX.zip`).
+2.  **Jobs Paralelos:** Os projetos 1 e 2 são executados em *Jobs* separados no `main.yml` (`analyze-layout` e `analyze-invoice`).
+3.  **Output Persistido:** O resultado de ambos os *jobs* é salvo como **Artefatos** no GitHub.
+4.  **Acesso ao Artefato:** Na aba **`Actions`**, você pode baixar o **Artefato JSON** (Projeto 2) e o **Artefato TXT** (Projeto 1) na página de resumo de cada execução.
 
 ---
 
@@ -75,7 +76,7 @@ Este repositório segue o **Padrão KAURA Unificado** para clareza e auditoria:
 
 * **`.gitignore`**: **CRUCIAL** para segurança. Garante que as chaves (Keys) e variáveis de ambiente nunca sejam enviadas ao GitHub.
 * **`SETUP.md`**: O guia completo de provisionamento e **FinOps** (estratégia de custo).
-* **`dados/`**: Contém os arquivos de teste (ex: `fatura-teste.pdf`) usados pelo pipeline de CI/CD.
+* **`dados/`**: Contém os arquivos de teste (ex: `fatura-teste.pdf`, `documento-teste.jpeg`) usados pelo pipeline de CI/CD.
 * `assets/`: Artefatos visuais e a imagem de teste usada pelo CI/CD.
 * `prompts/`: O Prompt Mestre usado para planejamento e arquitetura.
 * `src/`: O script Python de integração com o Azure Document Intelligence (`analyze_doc_ai.py`).
