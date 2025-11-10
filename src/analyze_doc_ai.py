@@ -94,23 +94,32 @@ def analyze_document(model_id, document_path):
                     valor = None
                     confianca = "N/A"
                     
+                    # Trecho a ser substituído/revisado DENTRO do loop de extração de campos:
+                    # (Este bloco está dentro do 'if campo and campo.value is not None:')
+                    
                     if campo and campo.value is not None:
                         confianca = f"{campo.confidence:.2f}"
                         
-                        # Tratamento específico para moeda (InvoiceTotal)
-                        if campo_nome == "InvoiceTotal" and campo.value_currency:
+                        # 1. TENTA TRATAR COMO MOEDA: Verifica se é o campo InvoiceTotal E SE O ATRIBUTO value_currency EXISTE
+                        # O uso de 'hasattr' evita o erro de atributo ('DocumentField' object has no attribute 'value_currency')
+                        if campo_nome == "InvoiceTotal" and hasattr(campo, 'value_currency') and campo.value_currency:
                             valor_currency = campo.value_currency
+                            # Formata o valor com a moeda detectada (ex: 219.99 BRL)
                             valor = f"{valor_currency.amount} {valor_currency.currency_code or valor_currency.currency_symbol}"
+                        
+                        # 2. CASO CONTRÁRIO (MOEDA NÃO DETECTADA OU OUTRO CAMPO), TRATA COMO VALOR SIMPLES (STRING/NUMÉRICO)
                         else:
+                            # Pega o valor diretamente. Para InvoiceTotal, será o número (219.99)
                             valor = str(campo.value)
                         
+                        # Armazena os dados extraídos no dicionário 'dados_extraidos'
                         dados_extraidos[campo_nome] = {
                             "Valor": valor,
-                            "Confianca": float(confianca) # Salvar como float no JSON
+                            "Confianca": float(confianca) 
                         }
                         
-                    # Imprime o resultado formatado
-                    print(f"**{campo_descricao}** ({campo_nome}): {valor or 'Não Encontrado'} (Confiança: {confianca})")
+                        # Imprime o resultado formatado
+                        print(f"**{campo_descricao}** ({campo_nome}): {valor or 'Não Encontrado'} (Confiança: {confianca})")
 
                 # --- 4. Salvar em JSON (para Artefato) ---
                 if config['output_file']:
