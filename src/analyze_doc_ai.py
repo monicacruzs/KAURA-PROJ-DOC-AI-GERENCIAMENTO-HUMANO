@@ -13,15 +13,18 @@ endpoint = os.environ.get("AZURE_FORM_RECOGNIZER_ENDPOINT")
 key = os.environ.get("AZURE_FORM_RECOGNIZER_KEY")
 VM_IP = os.environ.get("VM_IP_PUBLICO", "SUA_VM_IP_AQUI") # Usado para instrução SCP
 
-# --- Mapeamento de Campos e Configuração de Modelos ---
+
 # Define as configurações de caminho e extração para cada modelo
+# --- Mapeamento de Campos e Configuração de Modelos ---
 MODEL_CONFIG = {
     "prebuilt-layout": {
         "description": "Extração de Layout e Texto Puro.",
         "path": "dados/documento-teste.jpeg", # Atualizado para a pasta 'dados/' e extensão '.jpeg'
         "extract_fields": False,
-        "output_file": None
+        "output_file": "dados_layout_extraidos.txt" # <--- NOVO ARQUIVO DE SAÍDA
     },
+    # ... (prebuilt-invoice continua o mesmo)
+},
     "prebuilt-invoice": {
         "description": "Extração de Campos de Fatura.",
         "path": "dados/fatura-teste.pdf",
