@@ -43,7 +43,7 @@ jobs:
         # Usa o parâmetro --model-id para executar o modo de extração de fatura
         # O script Python gerará o arquivo dados_fatura_extraidos.json neste passo.
         run: |
-          python3 analyze_doc_ai.py --model-id prebuilt-invoice
+          python3 src/analyze_doc_ai.py --model-id prebuilt-invoice
 
       # 5. Salva o Output como Artefato
       - name: 5. Upload Output Artifact (JSON) 📦
