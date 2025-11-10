@@ -24,7 +24,6 @@ MODEL_CONFIG = {
         "output_file": "dados_layout_extraidos.txt" # <--- NOVO ARQUIVO DE SAÍDA
     },
     # ... (prebuilt-invoice continua o mesmo)
-},
     "prebuilt-invoice": {
         "description": "Extração de Campos de Fatura.",
         "path": "dados/fatura-teste.pdf",
