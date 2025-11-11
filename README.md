@@ -37,6 +37,19 @@ A arquitetura de processamento de documentos é Serverless/On-Demand via **GitHu
 4.  **Acesso ao Artefato:** Na aba **`Actions`**, você pode baixar o **Artefato JSON** (Projeto 2) e o **Artefato TXT** (Projeto 1) na página de resumo de cada execução.
 
 ---
+## 📦 Resultados da Automação (Artefatos de Saída)
+
+Abaixo estão os outputs dos modelos, persistidos na pasta `outputs/` do repositório, garantindo que o resultado da análise dos documentos seja imediato e acessível:
+
+| Arquivo de Saída | Projeto | Modelo Azure | Conteúdo |
+| :--- | :--- | :--- | :--- |
+| **`dados_fatura_extraidos.json`** | Projeto 2 | `prebuilt-invoice` | Extração estruturada de campos-chave (Total, ID, Cliente) em formato JSON. |
+| **`dados_layout_extraidos.txt`** | Projeto 1 | `prebuilt-layout` | Extração de texto puro e completo do documento (`documento-teste.jpeg`). |
+
+➡️ **Ver Resultado JSON:** [Clique aqui para ver o dados_fatura_extraidos.json](outputs/dados_fatura_extraidos.json)
+➡️ **Ver Resultado TXT:** [Clique aqui para ver o dados_layout_extraidos.txt](outputs/dados_layout_extraidos.txt)
+
+---
 
 ### 🏗️ Arquitetura e Conceitos do Azure Demonstrados
 
