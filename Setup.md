@@ -160,49 +160,173 @@ Este script é o coração do projeto. Ele se conecta ao Azure Document Intellig
 
 **Ação:** 1. Crie a pasta `src/`: `mkdir src`
 2. Crie e edite o arquivo Python: `nano src/analyze_doc_ai.py`
-3. Cole o código abaixo e salve (CTRL+X, S, ENTER).
+3. Cole o código e salve (CTRL+X, S, ENTER).
 
-> 💡 **Nota:** O código abaixo é um exemplo de *estrutura* para documentação. O código **final e funcional** que está no repositório (e que executa os **Projetos 1 e 2**) é o que deve ser mantido no arquivo `analyze_doc_ai.py`.
+> 💡 **Nota:** O código abaixo é um exemplo de *estrutura* para documentação. O código **final e funcional** que está no repositório é mais robusto: ele contém a lógica **unificada** para analisar tanto o `prebuilt-layout` quanto o `prebuilt-invoice` e salva dois arquivos diferentes (`.txt` e `.json`) como Artefatos.
 
 ```python
 # CÓDIGO DO ANALYZE_DOC_AI.PY
 
 import os
-from azure.ai.formrecognizer import DocumentAnalysisClient
+import argparse
+import json
 from azure.core.credentials import AzureKeyCredential
+from azure.ai.formrecognizer import DocumentAnalysisClient
+from dotenv import load_dotenv
 
-# 1. Variáveis de Ambiente (Configuradas no GitHub Secrets)
-endpoint = os.environ.get("AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT")
-key = os.environ.get("AZURE_DOCUMENT_INTELLIGENCE_KEY")
-document_path = os.path.join("assets", "lista-material-escolar.jpeg")
+# Carrega as variáveis de ambiente do arquivo .env (útil para desenvolvimento local,
+# mas no GitHub Actions, os secrets AZURE_* são usados diretamente)
+load_dotenv()
 
-if not endpoint or not key:
-    print("ERRO: Credenciais não encontradas. Verifique o GitHub Secrets.")
-    exit(1)
+# --- Configurações de Ambiente ---
+endpoint = os.environ.get("AZURE_FORM_RECOGNIZER_ENDPOINT")
+key = os.environ.get("AZURE_FORM_RECOGNIZER_KEY")
+VM_IP = os.environ.get("VM_IP_PUBLICO", "SUA_VM_IP_AQUI")
 
-# 2. Conexão com o Azure
-document_analysis_client = DocumentAnalysisClient(
-    endpoint=endpoint, credential=AzureKeyCredential(key)
-)
+# Define as configurações de caminho e extração para cada modelo
+# --- Mapeamento de Campos e Configuração de Modelos ---
+MODEL_CONFIG = {
+    "prebuilt-layout": {
+        "description": "Extração de Layout e Texto Puro.",
+        "path": "dados/documento-teste.jpeg", 
+        "extract_fields": False,
+        "output_file": "dados_layout_extraidos.txt" 
+    },
+    "prebuilt-invoice": {
+        "description": "Extração de Campos de Fatura.",
+        "path": "dados/fatura-teste.pdf",
+        "extract_fields": {
+            "InvoiceId": "ID da Fatura",
+            "CustomerName": "Nome do Cliente",
+            "InvoiceTotal": "Total da Fatura"
+        },
+        "output_file": "dados_fatura_extraidos.json"
+    }
+}
 
-# 3. Análise do Documento
-print(f"Iniciando análise do documento: {document_path}")
+def analyze_document(model_id, document_path):
+    """
+    Função unificada para análise de documentos com base no model_id.
+    """
+    if not endpoint or not key:
+        print("ERRO: O ENDPOINT ou KEY não foi encontrado nas variáveis de ambiente.")
+        return
 
-try:
-    with open(document_path, "rb") as f:
-        poller = document_analysis_client.begin_analyze_document(
-            "prebuilt-document", document=f.read() # Use seu modelo customizado ou prebuilt
-        )
-    result = poller.result()
-    
-    # 4. Impressão dos Resultados
-    print("--- RESULTADO DA ANÁLISE ---")
-    for doc in result.documents:
-        print(f"Tipo de Documento: {doc.doc_type}")
-        # A lógica de extração detalhada deve ir aqui
+    config = MODEL_CONFIG.get(model_id)
+    if not config:
+        print(f"ERRO: Modelo '{model_id}' não suportado ou não configurado.")
+        print(f"Modelos suportados: {list(MODEL_CONFIG.keys())}")
+        return
+
+    # 1. Autenticação no Azure
+    document_analysis_client = DocumentAnalysisClient(
+        endpoint=endpoint, credential=AzureKeyCredential(key)
+    )
+
+    # Verifica a existência do arquivo no workspace do GitHub Actions
+    if not os.path.exists(document_path):
+        print(f"ERRO: Arquivo de documento não encontrado no caminho: {document_path}")
+        print("\n*** AÇÃO NECESSÁRIA ***")
+        print(f"Confirme se o arquivo de teste ({document_path}) foi comitado para a pasta 'dados/' do repositório.")
+        return
+
+    print(f"Conectado ao Azure. Analisando documento: {document_path} usando modelo '{model_id}'...")
+
+    try:
+        # 2. Executa a análise
+        with open(document_path, "rb") as f:
+            poller = document_analysis_client.begin_analyze_document(
+                model_id, document=f.read()
+            )
+            result = poller.result()
+
+        print(f"\n--- Resultado da Análise ({config['description']}) ---")
         
-except FileNotFoundError:
-    print(f"ERRO: Arquivo não encontrado em {document_path}. Verifique a pasta assets.")
+        # ------------------------------------------------------------------
+        # 3. Lógica de Extração e Output (Modelos Estruturados: Projeto 2 - Faturas)
+        # ------------------------------------------------------------------
+        if config['extract_fields']:
+            dados_extraidos = {}
+            
+            if result.documents:
+                doc = result.documents[0]
+                
+                for campo_nome, campo_descricao in config['extract_fields'].items():
+                    campo = doc.fields.get(campo_nome)
+                    
+                    valor = None
+                    confianca = "N/A"
+                    
+                    if campo and campo.value is not None:
+                        confianca = f"{campo.confidence:.2f}"
+                        
+                        # Correção para o erro 'value_currency' (Projeto 2)
+                        if campo_nome == "InvoiceTotal" and hasattr(campo, 'value_currency') and campo.value_currency:
+                            valor_currency = campo.value_currency
+                            valor = f"{valor_currency.amount} {valor_currency.currency_code or valor_currency.currency_symbol}"
+                        else:
+                            valor = str(campo.value)
+                        
+                        dados_extraidos[campo_nome] = {
+                            "Valor": valor,
+                            "Confianca": float(confianca) 
+                        }
+                        
+                        print(f"**{campo_descricao}** ({campo_nome}): {valor or 'Não Encontrado'} (Confiança: {confianca})")
+
+                # --- 4. Salvar em JSON (para Artefato do Projeto 2) ---
+                if config['output_file']:
+                    with open(config['output_file'], "w", encoding="utf-8") as f:
+                        json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
+                    print(f"\n✅ Resultado da extração salvo para Artefato: {config['output_file']}")
+            
+            else:
+                print(f"Nenhum documento do tipo '{model_id}' detectado no arquivo.")
+
+        # ------------------------------------------------------------------
+        # 3. Lógica de Extração e Output (Modelos de Layout: Projeto 1 - Layout/OCR)
+        # ------------------------------------------------------------------
+        else: # Entra aqui se config['extract_fields'] é False
+            output_text = ""
+            # 1. Coleta e Imprime o Texto
+            for page in result.pages:
+                for line in page.lines:
+                    output_text += line.content + "\n" # Acumula o texto
+                    print(line.content) # Imprime no log
+            
+            # 2. Salvar em TXT (para Artefato do Projeto 1)
+            if config['output_file']:
+                with open(config['output_file'], "w", encoding="utf-8") as f:
+                    # Salva a string completa no arquivo TXT
+                    f.write(output_text) 
+                print(f"\n✅ Resultado do layout salvo para Artefato: {config['output_file']}")
+        
+        print("---------------------------------------")
+
+    except Exception as e:
+        print(f"\nERRO DURANTE A ANÁLISE DO DOCUMENTO: {e}")
+
+if __name__ == "__main__":
+    # --- Configuração do Argument Parser ---
+    parser = argparse.ArgumentParser(
+        description="Script unificado para análise de documentos usando o Azure Document Intelligence."
+    )
+    
+    # Argumento obrigatório para especificar o modelo
+    parser.add_argument(
+        '--model-id',
+        required=True,
+        choices=list(MODEL_CONFIG.keys()),
+        help=f"ID do modelo do Azure Document Intelligence a ser utilizado. Opções: {list(MODEL_CONFIG.keys())}"
+    )
+    
+    args = parser.parse_args()
+    
+    # Define o caminho do documento com base no modelo
+    path = MODEL_CONFIG[args.model_id]["path"]
+    
+    # Inicia a análise
+    analyze_document(args.model_id, path)
 
 # FIM DO CÓDIGO PYTHON
 ```
