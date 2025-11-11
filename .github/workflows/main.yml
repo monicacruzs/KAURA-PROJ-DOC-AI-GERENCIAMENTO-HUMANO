@@ -1,74 +1,58 @@
 # Nome do workflow
-name: Document AI Execution - CI
+name: CI/CD do Document Intelligence
 
-# Gatilho: Executar em qualquer push para a branch main
 on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
-# Define os trabalhos (jobs) separados
+# OIDC: Permissão NECESSÁRIA para o Action solicitar o token JWT do GitHub
+permissions:
+  id-token: write 
+  contents: read
+
 jobs:
-  # Job 1: Projeto KAURA-DOC-AI-FIN (Faturas)
-  analyze-invoice:
-    name: 📊 Projeto 2 - Analisar Faturas
+  analyze_document:
     runs-on: ubuntu-latest
+    environment: dev
     
-    # Variáveis de ambiente (Secrets) apenas para este Job
-    env:
-      AZURE_FORM_RECOGNIZER_ENDPOINT: ${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}
-      AZURE_FORM_RECOGNIZER_KEY: ${{ secrets.AZURE_FORM_RECOGNIZER_KEY }}
-
     steps:
-      - name: 1. Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 2. Set up Python and Install dependencies
-        uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
-      - run: pip install -r requirements.txt
+          python-version: '3.11' 
+          cache: 'pip'
           
-      # 3. Execução do Projeto 2
-      - name: 3. Execute Fatura Analysis Script
-        run: python3 src/analyze_doc_ai.py --model-id prebuilt-invoice
-
-      # 4. Upload do Artefato JSON (Output persistido)
-      - name: 4. Upload Output Artifact (JSON) 📦
-        uses: actions/upload-artifact@v4
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        
+      # --- AUTENTICAÇÃO SEGURA COM OIDC ---
+      - name: Azure Login via OIDC
+        uses: azure/login@v1
         with:
-          name: kaura-proj2-fatura-output-${{ github.run_id }}
-          path: dados_fatura_extraidos.json           
-          retention-days: 7
+          client-id: 3351acd5-3910-4697-884c-759b1836aa8d # Seu Client ID do SP
+          tenant-id: c8243f68-d848-4840-a4f8-cdb4bd79b1cf # Seu Tenant ID
+          subscription-id: 5d1efecb-c00e-4754-9a01-2845c83d1e4b # Seu Subscription ID
           
- # Job 2: Projeto DOC-AI-HUMANO (Layout/OCR)
-  analyze-layout:
-    name: 📝 Projeto 1 - Analisar Layout/OCR
-    runs-on: ubuntu-latest
-    
-    # Variáveis de ambiente (Secrets) apenas para este Job
-    env:
-      AZURE_FORM_RECOGNIZER_ENDPOINT: ${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}
-      AZURE_FORM_RECOGNIZER_KEY: ${{ secrets.AZURE_FORM_RECOGNIZER_KEY }}
-      
-    steps:
-      # 1 & 2. Checkout, Setup Python, Instalação
-      - name: 1. Checkout code
-        uses: actions/checkout@v4
-      - name: 2. Set up Python and Install dependencies
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-      - run: pip install -r requirements.txt
+      # --- DEFINIÇÃO DO ENDPOINT E KEY VAULT URI (Variáveis de ambiente) ---
+      # O script Python vai ler estas variáveis
+      - name: Set Environment Variables
+        run: |
+          # O ENDPOINT deve ser um GitHub Secret, pois é uma URL pública
+          echo "AZURE_FORM_RECOGNIZER_ENDPOINT=${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}" >> $GITHUB_ENV
+          # O URI do Key Vault pode ser hardcoded (é público e o segredo fica lá dentro)
+          echo "AZURE_KEY_VAULT_URI=https://kvkauradocaisecprod002.vault.azure.net/" >> $GITHUB_ENV
+          
+      - name: Execute Document Analysis
+        run: python src/analyze_doc_ai.py --model-id prebuilt-invoice
 
-      # 3. Execução do Projeto 1 (Gera o dados_layout_extraidos.txt)
-      - name: 3. Execute Layout Analysis Script
-        run: python3 src/analyze_doc_ai.py --model-id prebuilt-layout
-
-      # 4. Upload do Artefato TXT (Output persistido)
-      - name: 4. Upload Output Artifact (TXT) 📦
-        uses: actions/upload-artifact@v4
+      - name: Upload Artifacts (Output JSON/TXT)
+        uses: actions/upload-artifact@v3
         with:
-          name: kaura-proj1-layout-output-${{ github.run_id }}
-          path: dados_layout_extraidos.txt           
-          retention-days: 7
+          name: analysis-output
+          path: outputs/
