@@ -1,4 +1,3 @@
-# Nome do workflow
 name: CI/CD do Document Intelligence
 
 on:
@@ -35,24 +34,24 @@ jobs:
       - name: Azure Login via OIDC
         uses: azure/login@v1
         with:
-          client-id: 3351acd5-3910-4697-884c-759b1836aa8d
-          tenant-id: c8243f68-d848-4840-a4f8-cdb4bd79b1cf
-          subscription-id: 5d1efecb-c00e-4754-9a01-2845c83d1e4b
+          client-id: 3351acd5-3910-4697-884c-759b1836aa8d # Seu Client ID do SP
+          tenant-id: c8243f68-d848-4840-a4f8-cdb4bd79b1cf # Seu Tenant ID
+          subscription-id: 5d1efecb-c00e-4754-9a01-2845c83d1e4b # Seu Subscription ID
           
       # --- DEFINIÇÃO DO ENDPOINT E KEY VAULT URI (Variáveis de ambiente) ---
       # O script Python vai ler estas variáveis
       - name: Set Environment Variables
         run: |
-          # O ENDPOINT deve ser um GitHub Secret, pois é uma URL pública
+          # ENDPOINT (Via Secret)
           echo "AZURE_FORM_RECOGNIZER_ENDPOINT=${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}" >> $GITHUB_ENV
-          # O URI do Key Vault pode ser hardcoded (é público e o segredo fica lá dentro)
+          # URI do Key Vault (Hardcoded)
           echo "AZURE_KEY_VAULT_URI=https://kvkauradocaisecprod002.vault.azure.net/" >> $GITHUB_ENV
           
       - name: Execute Document Analysis
         run: python src/analyze_doc_ai.py --model-id prebuilt-invoice
 
       - name: Upload Artifacts (Output JSON/TXT)
-        uses: actions/upload-artifact@v4 # <--- Versão atualizada
+        uses: actions/upload-artifact@v4
         with:
           name: analysis-output
           path: outputs/
