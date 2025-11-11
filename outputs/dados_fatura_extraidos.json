@@ -1,0 +1,14 @@
+{
+    "InvoiceId": {
+        "Valor": "003589851",
+        "Confianca": 0.94
+    },
+    "CustomerName": {
+        "Valor": "Monica da Cruz Silva",
+        "Confianca": 0.53
+    },
+    "InvoiceTotal": {
+        "Valor": "219.99",
+        "Confianca": 0.94
+    }
+}
