@@ -162,10 +162,10 @@ Este script é o coração do projeto. Ele se conecta ao Azure Document Intellig
 2. Crie e edite o arquivo Python: `nano src/analyze_doc_ai.py`
 3. Cole o código abaixo e salve (CTRL+X, S, ENTER).
 
+> 💡 **Nota:** O código abaixo é um exemplo de *estrutura* para documentação. O código **final e funcional** que está no repositório (e que executa os **Projetos 1 e 2**) é o que deve ser mantido no arquivo `analyze_doc_ai.py`.
+
 ```python
-# CÓDIGO DO ANALYZE_DOC_AI.PY (Substitua pelo seu código final de análise)
-# (Este bloco deve conter o código Python que usa as variáveis de ambiente)
-# Exemplo básico de estrutura:
+# CÓDIGO DO ANALYZE_DOC_AI.PY
 
 import os
 from azure.ai.formrecognizer import DocumentAnalysisClient
@@ -208,60 +208,75 @@ except FileNotFoundError:
 ```
 #### 2.3.2. Arquivo de Workflow (.github/workflows/main.yml)
 
-Este arquivo define o pipeline que o GitHub Actions executará a cada git push.
+Este arquivo define o pipeline que o GitHub Actions executará a cada `git push`, executando os dois projetos de forma **independente** para isolamento de testes e geração de dois Artefatos.
 
-Ação: 
-1. Crie a pasta do workflow: mkdir -p .github/workflows 
-2. Crie e edite o arquivo YAML: nano .github/workflows/main.yml 
+**Ação:** 1. Crie a pasta do workflow: `mkdir -p .github/workflows` 
+2. Crie e edite o arquivo YAML: `nano .github/workflows/main.yml` 
 3. Cole o código abaixo e salve (CTRL+X, S, ENTER).
 
-```bash
-
-# CÓDIGO DO MAIN.YML (Workflow de CI/CD) :
+```yaml
 name: Document AI Execution - CI
 
-# Quando o workflow deve ser executado (a cada push na branch main)
 on:
   push:
     branches:
       - main
 
-# Define os trabalhos (jobs) que o workflow deve executar
 jobs:
-  analyze-document:
-    # O ambiente onde o código será executado (ambiente Linux hospedado no GitHub)
+  # --- JOB 1: PROJETO 2 - ANÁLISE DE FATURAS (JSON) ---
+  analyze-fatura:
+    name: Projeto 2 - Analisar Faturas
     runs-on: ubuntu-latest
-
-    # Variáveis de ambiente secretas (para o Azure)
     env:
-      # O GitHub Actions NÃO LÊ o arquivo .env.
-      # Você precisa adicionar estas variáveis nas "Secrets" do seu repositório no GitHub.
       AZURE_FORM_RECOGNIZER_ENDPOINT: ${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}
       AZURE_FORM_RECOGNIZER_KEY: ${{ secrets.AZURE_FORM_RECOGNIZER_KEY }}
-
-    # As etapas (steps) para executar o código
     steps:
-      # 1. Checkout: Clona o código do seu repositório
-      - name: Checkout code
+      - name: 1. Checkout code
         uses: actions/checkout@v4
-
-      # 2. Configura o Python: Garante que a versão correta do Python está instalada
-      - name: Set up Python
+      - name: 2. Set up Python and install dependencies
         uses: actions/setup-python@v5
         with:
           python-version: '3.x'
-
-      # 3. Instala as dependências: Instala os pacotes necessários (do requirements.txt)
-      - name: Install dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install -r requirements.txt
+      - name: 3. Run pip install -r requirements.txt
+        run: pip install -r requirements.txt
           
-      # 4. Executa o script principal: Roda o analyze_doc_ai.py
-      - name: Execute Document Analysis Script
-        run: |
-          python3 src/analyze_doc_ai.py
+      - name: 4. Execute Fatura Analysis Script
+        run: python3 src/analyze_doc_ai.py --model-id prebuilt-invoice
     
+      # Upload do Artefato JSON
+      - name: 5. Upload Output Artifact (JSON) 📦
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaura-proj2-fatura-output-${{ github.run_id }}
+          path: dados_fatura_extraidos.json
+          
+  # --- JOB 2: PROJETO 1 - ANÁLISE DE LAYOUT (TXT) ---
+  analyze-layout:
+    name: Projeto 1 - Analisar Layout/OCR
+    runs-on: ubuntu-latest
+    env:
+      AZURE_FORM_RECOGNIZER_ENDPOINT: ${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}
+      AZURE_FORM_RECOGNIZER_KEY: ${{ secrets.AZURE_FORM_RECOGNIZER_KEY }}
+    steps:
+      - name: 1. Checkout code
+        uses: actions/checkout@v4
+      - name: 2. Set up Python and install dependencies
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: 3. Run pip install -r requirements.txt
+        run: pip install -r requirements.txt
+          
+      - name: 4. Execute Layout Analysis Script
+        run: python3 src/analyze_doc_ai.py --model-id prebuilt-layout
+        
+      # Upload do Artefato TXT
+      - name: 5. Upload Output Artifact (TXT) 📦
+        uses: actions/upload-artifact@v4
+        with:
+          name: kaura-proj1-layout-output-${{ github.run_id }}
+          path: dados_layout_extraidos.txt
+   
    ``` 
 
 ### 2.4. Envio do Código e Início do Pipeline (Git Push)
