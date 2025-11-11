@@ -5,25 +5,24 @@ from azure.core.credentials import AzureKeyCredential
 from azure.ai.formrecognizer import DocumentAnalysisClient
 from dotenv import load_dotenv
 
-# Carrega as variáveis de ambiente do arquivo .env
+# Carrega as variáveis de ambiente do arquivo .env (útil para desenvolvimento local,
+# mas no GitHub Actions, os secrets AZURE_* são usados diretamente)
 load_dotenv()
 
 # --- Configurações de Ambiente ---
 endpoint = os.environ.get("AZURE_FORM_RECOGNIZER_ENDPOINT")
 key = os.environ.get("AZURE_FORM_RECOGNIZER_KEY")
-VM_IP = os.environ.get("VM_IP_PUBLICO", "SUA_VM_IP_AQUI") # Usado para instrução SCP
-
+VM_IP = os.environ.get("VM_IP_PUBLICO", "SUA_VM_IP_AQUI")
 
 # Define as configurações de caminho e extração para cada modelo
 # --- Mapeamento de Campos e Configuração de Modelos ---
 MODEL_CONFIG = {
     "prebuilt-layout": {
         "description": "Extração de Layout e Texto Puro.",
-        "path": "dados/documento-teste.jpeg", # Atualizado para a pasta 'dados/' e extensão '.jpeg'
+        "path": "dados/documento-teste.jpeg", 
         "extract_fields": False,
-        "output_file": "dados_layout_extraidos.txt" # <--- NOVO ARQUIVO DE SAÍDA
+        "output_file": "dados_layout_extraidos.txt" 
     },
-    # ... (prebuilt-invoice continua o mesmo)
     "prebuilt-invoice": {
         "description": "Extração de Campos de Fatura.",
         "path": "dados/fatura-teste.pdf",
@@ -32,7 +31,7 @@ MODEL_CONFIG = {
             "CustomerName": "Nome do Cliente",
             "InvoiceTotal": "Total da Fatura"
         },
-        "output_file": "dados_fatura_extraidos.json" # Arquivo de saída para o Artefato
+        "output_file": "dados_fatura_extraidos.json"
     }
 }
 
@@ -41,7 +40,7 @@ def analyze_document(model_id, document_path):
     Função unificada para análise de documentos com base no model_id.
     """
     if not endpoint or not key:
-        print("ERRO: O ENDPOINT ou KEY não foi encontrado no arquivo .env.")
+        print("ERRO: O ENDPOINT ou KEY não foi encontrado nas variáveis de ambiente.")
         return
 
     config = MODEL_CONFIG.get(model_id)
@@ -55,18 +54,11 @@ def analyze_document(model_id, document_path):
         endpoint=endpoint, credential=AzureKeyCredential(key)
     )
 
-    # Verifica a existência do arquivo
+    # Verifica a existência do arquivo no workspace do GitHub Actions
     if not os.path.exists(document_path):
         print(f"ERRO: Arquivo de documento não encontrado no caminho: {document_path}")
-        
-        # Cria a pasta 'dados/' se não existir
-        os.makedirs(os.path.dirname(document_path) or "dados", exist_ok=True)
-        
         print("\n*** AÇÃO NECESSÁRIA ***")
-        print(f"Suba seu arquivo de teste ({document_path}) para a pasta '{os.path.dirname(document_path) or 'dados/'}'.")
-        print(f"Exemplo de comando SCP (no seu terminal local, não no SSH):")
-        print(f"scp /caminho/do/seu/arquivo kaurauser@{VM_IP}:/home/kaurauser/KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO/{document_path}")
-
+        print(f"Confirme se o arquivo de teste ({document_path}) foi comitado para a pasta 'dados/' do repositório.")
         return
 
     print(f"Conectado ao Azure. Analisando documento: {document_path} usando modelo '{model_id}'...")
@@ -81,11 +73,11 @@ def analyze_document(model_id, document_path):
 
         print(f"\n--- Resultado da Análise ({config['description']}) ---")
         
-        # Dicionário para armazenar dados extraídos (apenas para modelos de extração de campos)
-        dados_extraidos = {} 
-        
-        # 3. Lógica de Extração e Output
+        # ------------------------------------------------------------------
+        # 3. Lógica de Extração e Output (Modelos Estruturados: Projeto 2 - Faturas)
+        # ------------------------------------------------------------------
         if config['extract_fields']:
+            dados_extraidos = {}
             
             if result.documents:
                 doc = result.documents[0]
@@ -96,34 +88,24 @@ def analyze_document(model_id, document_path):
                     valor = None
                     confianca = "N/A"
                     
-                    # Trecho a ser substituído/revisado DENTRO do loop de extração de campos:
-                    # (Este bloco está dentro do 'if campo and campo.value is not None:')
-                    
                     if campo and campo.value is not None:
                         confianca = f"{campo.confidence:.2f}"
                         
-                        # 1. TENTA TRATAR COMO MOEDA: Verifica se é o campo InvoiceTotal E SE O ATRIBUTO value_currency EXISTE
-                        # O uso de 'hasattr' evita o erro de atributo ('DocumentField' object has no attribute 'value_currency')
+                        # Correção para o erro 'value_currency' (Projeto 2)
                         if campo_nome == "InvoiceTotal" and hasattr(campo, 'value_currency') and campo.value_currency:
                             valor_currency = campo.value_currency
-                            # Formata o valor com a moeda detectada (ex: 219.99 BRL)
                             valor = f"{valor_currency.amount} {valor_currency.currency_code or valor_currency.currency_symbol}"
-                        
-                        # 2. CASO CONTRÁRIO (MOEDA NÃO DETECTADA OU OUTRO CAMPO), TRATA COMO VALOR SIMPLES (STRING/NUMÉRICO)
                         else:
-                            # Pega o valor diretamente. Para InvoiceTotal, será o número (219.99)
                             valor = str(campo.value)
                         
-                        # Armazena os dados extraídos no dicionário 'dados_extraidos'
                         dados_extraidos[campo_nome] = {
                             "Valor": valor,
                             "Confianca": float(confianca) 
                         }
                         
-                        # Imprime o resultado formatado
                         print(f"**{campo_descricao}** ({campo_nome}): {valor or 'Não Encontrado'} (Confiança: {confianca})")
 
-                # --- 4. Salvar em JSON (para Artefato) ---
+                # --- 4. Salvar em JSON (para Artefato do Projeto 2) ---
                 if config['output_file']:
                     with open(config['output_file'], "w", encoding="utf-8") as f:
                         json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
@@ -131,12 +113,24 @@ def analyze_document(model_id, document_path):
             
             else:
                 print(f"Nenhum documento do tipo '{model_id}' detectado no arquivo.")
-        
-        else:
-            # Lógica para modelos que extraem texto puro (prebuilt-layout)
+
+        # ------------------------------------------------------------------
+        # 3. Lógica de Extração e Output (Modelos de Layout: Projeto 1 - Layout/OCR)
+        # ------------------------------------------------------------------
+        else: # Entra aqui se config['extract_fields'] é False
+            output_text = ""
+            # 1. Coleta e Imprime o Texto
             for page in result.pages:
                 for line in page.lines:
-                    print(line.content)
+                    output_text += line.content + "\n" # Acumula o texto
+                    print(line.content) # Imprime no log
+            
+            # 2. Salvar em TXT (para Artefato do Projeto 1)
+            if config['output_file']:
+                with open(config['output_file'], "w", encoding="utf-8") as f:
+                    # Salva a string completa no arquivo TXT
+                    f.write(output_text) 
+                print(f"\n✅ Resultado do layout salvo para Artefato: {config['output_file']}")
         
         print("---------------------------------------")
 
