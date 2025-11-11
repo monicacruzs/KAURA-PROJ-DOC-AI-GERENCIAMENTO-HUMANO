@@ -36,7 +36,7 @@ jobs:
         uses: azure/login@v1
         with:
           client-id: 3351acd5-3910-4697-884c-759b1836aa8d # Seu Client ID do SP
-          tenant-id: c8243f68-d848-4840-a4f8-cdb4bd79b1cf/common # Seu Tenant ID
+          tenant-id: c8243f68-d848-4840-a4f8-cdb4bd79b1cf # Seu Tenant ID
           subscription-id: 5d1efecb-c00e-4754-9a01-2845c83d1e4b # Seu Subscription ID
           
       # --- DEFINIÇÃO DO ENDPOINT E KEY VAULT URI (Variáveis de ambiente) ---
