@@ -52,7 +52,7 @@ jobs:
         run: python src/analyze_doc_ai.py --model-id prebuilt-invoice
 
       - name: Upload Artifacts (Output JSON/TXT)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # <--- Versão atualizada
         with:
           name: analysis-output
           path: outputs/
