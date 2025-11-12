@@ -1,0 +1,14 @@
+Quero iniciar o Projeto 2: KAURA-DOC-AI-FIN (Automação de Faturas).
+
+Premissas:
+
+Vou usar o mesmo repositório no GitHub chamado KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO.
+
+A arquitetura de infraestrutura e o FinOps serão os mesmos do Projeto 1 (Custo Zero Estrutural).
+
+O objetivo é automatizar a extração de dados financeiros de faturas usando o modelo prebuilt-invoice do Azure Document Intelligence.
+
+Direcionamento: Preciso de ajuda para focar na migração: 
+a) Qual é o código Python atualizado (novo analyze_doc_ai.py) para extrair os campos InvoiceId, CustomerName e InvoiceTotal do modelo prebuilt-invoice? 
+b) Como devo atualizar o README.md e o SETUP.md do novo projeto para reutilizar a documentação de FinOps/CI/CD, mas destacar a extração de faturas? Utilizaremos um nome só (novo analyze_doc_ai.py) para todos os modelos ou cada modelo novo terá seu .py ?
+
