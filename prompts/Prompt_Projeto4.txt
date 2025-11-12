@@ -1,0 +1,13 @@
+Quero iniciar o Projeto 4: KAURA-DOC-AI-CUSTOM (Modelo Customizado).
+
+Premissas do Portfólio:
+
+Continuaremos usando o repositório KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO.
+
+O Key Vault (Projeto 3) e o FinOps (Custo Zero) são a base.
+
+Nosso objetivo é treinar um modelo próprio para extrair dados de um documento não-padrão.
+
+Direcionamento: Preciso de ajuda para estruturar o processo de ML: a) Qual é o passo a passo de alto nível (simulando a interface do Studio) para criar o recurso de Storage e o treinamento do Modelo Customizado? b) Qual é o código Python atualizado para usar o modelo customizado (substituindo o prebuilt-invoice)? O código deve usar o model_id que obteremos no Studio. c) Como devo atualizar o SETUP.md para documentar o processo de treinamento e as regras de permissão necessárias no Storage para o treinamento?
+
+Vamos focar no ciclo de vida de Machine Learning, da criação à execução via CI/CD.
