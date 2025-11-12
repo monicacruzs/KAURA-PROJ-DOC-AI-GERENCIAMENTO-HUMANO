@@ -37,7 +37,7 @@ jobs:
           client-id: 3351acd5-3910-4697-884c-759b1836aa8d
           # MUDANÇA CRUCIAL: Trocamos o Secret pela string literal do Tenant ID:
           tenant-id: c0243fd8-d848-4840-a4f8-cdb4bd79b1cf
-          subscription-id: 5d1efecb-c00e-4754-9a01-2845c83d1e4b
+          subscription-id: 581e9cfb-c00e-4754-9a01-2845c83d1e4b
           
       # --- DEFINIÇÃO DO ENDPOINT E KEY VAULT URI (Variáveis de ambiente) ---
       # O script Python vai ler estas variáveis
