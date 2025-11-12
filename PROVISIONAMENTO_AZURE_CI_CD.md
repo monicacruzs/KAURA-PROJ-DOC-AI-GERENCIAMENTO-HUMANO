@@ -78,7 +78,7 @@ az keyvault set-policy \
 ### Passo 4: Configurar Secrets no GitHub
 Localização: Settings -> Secrets and variables -> Actions.
 
-[Configuração de Secrets no GitHub, mostrando Tenant ID e Endpoint](assets/GitHub_ActionseSecrets.jpg)
+[Configuração de Secrets no GitHub, mostrando Tenant ID e Endpoint](assets/GitHub_ActionseSecrets.png)
 
 ### Passo 5: Atualizar o .github/workflows/main.yml
 O pipeline deve usar os IDs corretos e o Secret para o Tenant ID.
