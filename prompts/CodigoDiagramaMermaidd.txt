@@ -1,0 +1,36 @@
+graph TD
+    subgraph PROVISIONAMENTO
+        A[Azure CLI / Portal] --> B(Subscription - Fatura/Cobrança);
+        B --> C[Resource Group - RG-KAURA-DOC-AI];
+        C --> D(Document Intelligence - kaura-doc-ai-service);
+        C --> E(Key Vault - kvkauradocaisecprod002);
+        C --> F(Service Principal - sp-kaura-doc-ai-oidc);
+        D --> H{Endpoint URL};
+        E --> I{Chave Secreta DI};
+        F --> J(Client ID e Credencial OIDC);
+        
+        style C fill:#90EE90,stroke:#3C3
+        style D fill:#ADD8E6,stroke:#00F
+        style E fill:#FFFACD,stroke:#DAA520
+        style F fill:#F08080,stroke:#B22222
+    end
+    
+    subgraph SEGURANCA
+        K[GitHub Actions] -- 1. Token JWT (OIDC) --> L(Azure Entra ID - Validação Credencial Federada);
+        L -- 2. Login bem-sucedido (Role Reader) --> M[SP Autenticado - sp-kaura-doc-ai-oidc];
+        
+        M -- 3. Leitura do URI do Key Vault --> N[Key Vault];
+        N -- 4. Política de Acesso (GET) --> M;
+        N -- 5. Retorna Chave DI --> M;
+        M -- 6. Executa Análise --> P[Document Intelligence Service];
+        
+        style K fill:#F08080,stroke:#B22222
+        style M fill:#ADD8E6,stroke:#00F
+        style N fill:#FFFACD,stroke:#DAA520
+        style P fill:#90EE90,stroke:#3C3
+    end
+    
+    %% Conexões entre as subseções (opcional)
+    H -- Usado no Script --> P;
+    I -- Usado na Execução --> P;
+    J -- Configurado no GitHub Secrets --> K;
