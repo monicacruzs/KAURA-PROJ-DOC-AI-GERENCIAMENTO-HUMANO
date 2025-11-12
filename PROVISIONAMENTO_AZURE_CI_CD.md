@@ -65,21 +65,7 @@ az keyvault set-policy \
     --spn 3351acd5-3910-4697-884c-759b1836aa8d \
     --secret-permissions get
 ```
-
-## 🔒 III. Configuração do Key Vault
-### Passo 3: Definir Política de Acesso no Key Vault
-Concede a permissão Get (Obter Segredo) ao SP.
-
-**Comando Azure CLI:**
-
-``` bash
-# Assumindo que o Key Vault se chama 'kvkauradocaisecprod002'
-az keyvault set-policy \
-    --name kvkauradocaisecprod002 \
-    --spn 3351acd5-3910-4697-884c-759b1836aa8d \
-    --secret-permissions get
-```
-### ⚙️ IV. Configuração do GitHub Secrets e main.yml
+### ⚙️ III. Configuração do GitHub Secrets e main.yml
 
 ### Passo 4: Configurar Secrets no GitHub
 Localização: Settings -> Secrets and variables -> Actions.
