@@ -43,6 +43,8 @@ az ad app federated-credential create \
     --subject "repo:monicacruzs/KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO:environment:dev" \
     --audiences "api://AzureADTokenExchange"
 ```
+Nota: Microsoft Entra ID ->  App Registrations ->  View all aplication in the directory (botão) > sp-kaura-doc-ai-oidc -> Certificates & Secrets: Você poderá ver a Federated Credentials
+
 🔒 III. Configuração do Key Vault
 Movemos a KEY do Document Intelligence para o Key Vault.
 
