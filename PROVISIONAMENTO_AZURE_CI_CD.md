@@ -2,6 +2,17 @@
 
 Este guia documenta o processo correto e otimizado para configurar a autenticação OIDC (OpenID Connect) do GitHub Actions no Azure, eliminando segredos de longa duração e garantindo o acesso ao Key Vault.
 
+## 💰 Custo e Recursos Utilizados
+
+Os custos de provisionamento e teste são mantidos baixos, utilizando serviços de baixo custo ou gratuitos (Free Tier).
+
+[Recursos utilizados no Azure, incluindo Document Intelligence e Key Vault](assets/Azure_RecursosUtilizados_free.png)
+
+| Custo | Valor (em R$) |
+| :--- | :--- |
+| **Current Cost (Custo Atual)** | R$1.00 |
+| **Custos por Recurso (Exemplos)** | Document Intelligence (R$0.62); Key Vault (R$0.11 - Outros) |
+
 ## 📝 I. Informações Essenciais (IDs)
 
 Estes são os IDs verificados da sua conta.
@@ -11,8 +22,6 @@ Estes são os IDs verificados da sua conta.
 | **Tenant ID** (ID do Diretório) | `c0243fd8-d848-4840-a4f8-cdb4bd79b1cf` | Entra ID -> Overview |
 | **Subscription ID** (ID da Assinatura) | `581e9cfb-c00e-4754-9a01-2845c83d1e4b` | Assinaturas -> Overview |
 | **Client ID** (ID do Aplicativo SP) | `3351acd5-3910-4697-884c-759b1836aa8d` | Entra ID -> App registrations -> SP Overview |
-
----
 
 ## 🔑 II. Configuração do Service Principal (SP) e Permissões
 
@@ -29,6 +38,7 @@ az role assignment create \
     --assignee 3351acd5-3910-4697-884c-759b1836aa8d \
     --scope /subscriptions/581e9cfb-c00e-4754-9a01-2845c83d1e4b
 ```
+
 ### Passo 2: Configurar a Credencial de Identidade Federada (OIDC)
 Cria a ponte de confiança, usando o ambiente dev configurado no seu YAML.
 
@@ -50,11 +60,9 @@ az ad app federated-credential create \
 ```
 Nota: Microsoft Entra ID ->  App Registrations ->  View all aplication in the directory (botão) > sp-kaura-doc-ai-oidc -> Certificates & Secrets: Você poderá ver a Federated Credentials
 
-🔒 III. Configuração do Key Vault
-Movemos a KEY do Document Intelligence para o Key Vault.
-
+## 🔒 III. Configuração do Key Vault
 ### Passo 3: Definir Política de Acesso no Key Vault
-Concede a permissão Get (Obter Segredo) ao SP (3351acd5-3910-4697-884c-759b1836aa8d).
+Concede a permissão Get (Obter Segredo) ao SP.
 
 **Comando Azure CLI:**
 
@@ -65,10 +73,13 @@ az keyvault set-policy \
     --spn 3351acd5-3910-4697-884c-759b1836aa8d \
     --secret-permissions get
 ```
-### Passo 4: Alterações no main.yml
-As alterações concentraram-se na seção de login e na definição das variáveis de ambiente.
+### ⚙️ IV. Configuração do GitHub Secrets e main.yml
 
-**1. Correção e Estrutura Final do Login OIDC**
+### Passo 4: Configurar Secrets no GitHub
+Localização: Settings -> Secrets and variables -> Actions.
+
+### Passo 5: Atualizar o .github/workflows/main.yml
+O pipeline deve usar os IDs corretos e o Secret para o Tenant ID.
 A estrutura final no seu main.yml é a seguinte (usando o Secret para o Tenant ID, que é a melhor prática):
 
 ```yaml
