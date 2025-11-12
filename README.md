@@ -19,6 +19,10 @@ O problema humano é claro: digitar dados de faturas ou contratos é tedioso e p
 ---
 ### 🛡️ Evolução Arquitetural: Migração para OIDC e Key Vault (Melhores Práticas)
 
+<p align="center">
+    <img width="150" src="https://github.com/monicacruzs/KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO/blob/main/assets/assets/.Diagramapng" alt="Diagrama Arquitetural"> 
+</p>
+
 A configuração do pipeline CI/CD exigiu uma migração estratégica para as melhores práticas de segurança do Azure/GitHub.
 
 | De onde viemos | Para onde fomos | Razão |
