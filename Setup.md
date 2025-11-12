@@ -40,6 +40,57 @@ az cognitiveservices account create \
     --sku "F0" \
     --yes
 ```
+### 1.2. Criação e Configuração do Key Vault (Para a Chave Secreta)
+
+O Key Vault é criado para armazenar de forma segura a chave de acesso do Document Intelligence, seguindo as melhores práticas de segurança e eliminando a exposição de segredos no GitHub.
+
+**1. Registrar o Provedor de Recursos (Obrigatório na primeira vez):**
+Este comando garante que o Azure CLI possa criar recursos do Key Vault na sua assinatura.
+```bash
+az provider register --namespace 'Microsoft.KeyVault'
+```
+
+**2. Criação do Key Vault:**
+Utilizamos o SKU standard e desabilitamos a autorização RBAC inicial para usarmos as políticas de acesso legadas, que são mais simples de configurar neste contexto.
+
+🔑 KeyVaultName: kvkauradocaisecprod002 (Nome que você usou em todo o CI/CD)
+
+```bash
+az keyvault create \
+  --name "kvkauradocaisecprod002" \
+  --resource-group "RG-KAURA-DOC-AI" \
+  --location "brazilsouth" \
+  --sku "standard" \
+  --enable-rbac-authorization false
+  ```
+**3. Obter e Armazenar a Chave do Document Intelligence:**
+
+Este é o passo mais importante: a chave do DI sai do Portal e entra no Key Vault.
+
+Passo Manual: Obtenha a Key 1 do seu recurso kaura-doc-ai-service-kaura no Portal Azure (seção Keys and Endpoint).
+
+Armazenar no KV: Use o comando abaixo, substituindo [CHAVE_DOCUMENT_INTELLIGENCE_AQUI] pelo valor copiado:
+
+```bash
+az keyvault secret set \
+  --vault-name "kvkauradocaisecprod002" \
+  --name "document-intelligence-key" \
+  --value "[CHAVE_DOCUMENT_INTELLIGENCE_AQUI]"
+  ```
+**4. Definir a Política de Acesso para Teste Local (Opcional):**
+
+Este passo permite que sua conta de usuário (não o Service Principal do CI/CD) acesse o segredo, útil para testes de desenvolvimento local antes de rodar o pipeline.
+
+```bash
+# 1. Obtém seu Object ID
+OBJECT_ID=$(az ad signed-in-user show --query id -o tsv)
+ 
+# 2. Define permissão 'get' e 'list' de segredos no Key Vault para sua conta
+az keyvault set-policy \
+  --name "kvkauradocaisecprod002" \
+  --object-id "$OBJECT_ID" \
+  --secret-permissions get list
+ ```
 ### 1.2. Obter Credenciais (Passo de Segurança)
 ⚠️ ALERTA DE SEGURANÇA: O resultado destes comandos deve ser anotado em um local seguro e JAMAIS salvo publicamente neste repositório.
 
