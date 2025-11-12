@@ -105,48 +105,48 @@ def analyze_document(model_id, document_path):
     
     try:
     # 2. Executa a análise (Abre o arquivo e inicia o poller)
-    with open(document_path, "rb") as f:
-        poller = document_analysis_client.begin_analyze_document(
-            model_id, document=f.read()
-        )
-        result = poller.result() # Esta linha pode gerar exceções de rede/API
-        
-    print(f"\n--- Resultado da Análise ({config['description']}) ---")
-    
-    # ------------------------------------------------------------------
-    # 3. Lógica de Extração e Output (Modelos Estruturados: Projeto 2 - Faturas)
-    # ------------------------------------------------------------------
-    if config['extract_fields']:
-        dados_extraidos = {}
-        
-        if result.documents:
-            doc = result.documents[0]
+        with open(document_path, "rb") as f:
+            poller = document_analysis_client.begin_analyze_document(
+                model_id, document=f.read()
+            )
+            result = poller.result() # Esta linha pode gerar exceções de rede/API
             
-            # ... (Lógica de loop e extração dos campos) ...
+        print(f"\n--- Resultado da Análise ({config['description']}) ---")
+        
+        # ------------------------------------------------------------------
+        # 3. Lógica de Extração e Output (Modelos Estruturados: Projeto 2 - Faturas)
+        # ------------------------------------------------------------------
+        if config['extract_fields']:
+            dados_extraidos = {}
             
-            # --- 4. Salvar em JSON (para Artefato do Projeto 2) ---
+            if result.documents:
+                doc = result.documents[0]
+                
+                # ... (Lógica de loop e extração dos campos) ...
+                
+                # --- 4. Salvar em JSON (para Artefato do Projeto 2) ---
+                if config['output_file']:
+                    with open(config['output_file'], "w", encoding="utf-8") as f:
+                        json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
+                    print(f"\n✅ Resultado da extração salvo para Artefato: {config['output_file']}")
+                    
+            else:
+                print(f"Nenhum documento do tipo '{model_id}' detectado no arquivo.")
+                
+        # ------------------------------------------------------------------
+        # 3. Lógica de Extração e Output (Modelos de Layout: Projeto 1 - Layout/OCR)
+        # ------------------------------------------------------------------
+        else: # Entra aqui se config['extract_fields'] é False
+            output_text = ""
+            # ... (Lógica de loop e extração de texto) ...
+            
+            # 2. Salvar em TXT (para Artefato do Projeto 1)
             if config['output_file']:
                 with open(config['output_file'], "w", encoding="utf-8") as f:
-                    json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
-                print(f"\n✅ Resultado da extração salvo para Artefato: {config['output_file']}")
-                
-        else:
-            print(f"Nenhum documento do tipo '{model_id}' detectado no arquivo.")
+                    f.write(output_text)  
+                print(f"\n✅ Resultado do layout salvo para Artefato: {config['output_file']}")
             
-    # ------------------------------------------------------------------
-    # 3. Lógica de Extração e Output (Modelos de Layout: Projeto 1 - Layout/OCR)
-    # ------------------------------------------------------------------
-    else: # Entra aqui se config['extract_fields'] é False
-        output_text = ""
-        # ... (Lógica de loop e extração de texto) ...
-        
-        # 2. Salvar em TXT (para Artefato do Projeto 1)
-        if config['output_file']:
-            with open(config['output_file'], "w", encoding="utf-8") as f:
-                f.write(output_text)  
-            print(f"\n✅ Resultado do layout salvo para Artefato: {config['output_file']}")
-        
-    print("---------------------------------------")
+        print("---------------------------------------")
 
     except Exception as e:
         print(f"\nERRO DURANTE A ANÁLISE DO DOCUMENTO: {e}")
