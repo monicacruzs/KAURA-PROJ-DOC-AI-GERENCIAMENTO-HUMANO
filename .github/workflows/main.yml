@@ -29,6 +29,15 @@ jobs:
           
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Force Subscription Selection
+        run: |
+          # 1. Limpa o cache do Azure CLI
+          az account clear
+          # 2. Força a seleção da Assinatura e do Tenant.
+          # O Service Principal JÁ TEM a permissão Reader no nível da Assinatura
+          az login --service-principal -u 3351acd5-3910-4697-884c-759b1836aa8d -t ${{ secrets.AZURE_TENANT_ID }}
+          az account set --subscription 5d1efecb-c00e-4754-9a01-2845c83d1e4b
         
       # --- AUTENTICAÇÃO SEGURA COM OIDC ---
       - name: Azure Login via OIDC
