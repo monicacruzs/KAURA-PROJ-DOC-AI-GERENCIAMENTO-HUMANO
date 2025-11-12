@@ -8,10 +8,10 @@ O projeto segue uma rigorosa política de **Custo Zero**. O provisionamento é d
 2.  **Fase 2 (Custo por Hora - IaaS):** Criação da Máquina Virtual (VM) para execução do script, com a meta de execução e **desprovisionamento total em no máximo 2 horas**.
 
 ---
+## 1. FASE 1: PROVISIONAMENTO (CUSTO ZERO - PAAS)
 
-## 1. FASE 1: PROVISIONAMENTO (CUSTO ZERO)
+Estes comandos criam o "container" do projeto e os serviços de PaaS de custo zero. Eles devem ser executados no **Azure Cloud Shell** ou em um ambiente com o Azure CLI instalado.
 
-Estes comandos criam o "container" do projeto e o serviço de Inteligência Artificial. Eles devem ser executados no **Azure Cloud Shell** ou em um ambiente com o Azure CLI instalado.
 
 ### 1.1. Configuração e Criação do Serviço de IA
 
@@ -40,16 +40,17 @@ az cognitiveservices account create \
     --sku "F0" \
     --yes
 ```
-### 1.2. Criação e Configuração do Key Vault (Para a Chave Secreta)
 
-O Key Vault é criado para armazenar de forma segura a chave de acesso do Document Intelligence, seguindo as melhores práticas de segurança e eliminando a exposição de segredos no GitHub.
+---
 
-**1. Registrar o Provedor de Recursos (Obrigatório na primeira vez):**
-Este comando garante que o Azure CLI possa criar recursos do Key Vault na sua assinatura.
+### 1.2. Criação e Configuração do Key Vault (Melhoria de Segurança)
+
+Este passo cria o Key Vault para armazenar a chave secreta do DI, seguindo as melhores práticas.
+
+**1. Registrar o Provedor de Recursos:**
 ```bash
 az provider register --namespace 'Microsoft.KeyVault'
 ```
-
 **2. Criação do Key Vault:**
 Utilizamos o SKU standard e desabilitamos a autorização RBAC inicial para usarmos as políticas de acesso legadas, que são mais simples de configurar neste contexto.
 
@@ -67,9 +68,9 @@ az keyvault create \
 
 Este é o passo mais importante: a chave do DI sai do Portal e entra no Key Vault.
 
-Passo Manual: Obtenha a Key 1 do seu recurso kaura-doc-ai-service-kaura no Portal Azure (seção Keys and Endpoint).
+- Passo Manual: Obtenha a Key 1 do seu recurso AI.
 
-Armazenar no KV: Use o comando abaixo, substituindo [CHAVE_DOCUMENT_INTELLIGENCE_AQUI] pelo valor copiado:
+- Armazenar no KV: Substitua [CHAVE_DOCUMENT_INTELLIGENCE_AQUI] pelo valor copiado:
 
 ```bash
 az keyvault secret set \
@@ -79,7 +80,7 @@ az keyvault secret set \
   ```
 **4. Definir a Política de Acesso para Teste Local (Opcional):**
 
-Este passo permite que sua conta de usuário (não o Service Principal do CI/CD) acesse o segredo, útil para testes de desenvolvimento local antes de rodar o pipeline.
+Este passo define uma política de acesso que permite à sua conta de usuário (não o Service Principal) ler o segredo do Key Vault, sendo útil para testes de desenvolvimento local.
 
 ```bash
 # 1. Obtém seu Object ID
@@ -91,7 +92,12 @@ az keyvault set-policy \
   --object-id "$OBJECT_ID" \
   --secret-permissions get list
  ```
-### 1.2. Obter Credenciais (Passo de Segurança)
+
+---
+
+### 1.3. Obter Credenciais Finais (Endpoint e IDs)
+Este passo é necessário para obter o Endpoint (URL) (que não vai para o KV) e para documentar o Tenant/Subscription IDs, que são necessários para o CI/CD (OIDC) e para a fase inicial de teste na VM.
+
 ⚠️ ALERTA DE SEGURANÇA: O resultado destes comandos deve ser anotado em um local seguro e JAMAIS salvo publicamente neste repositório.
 
 ```bash
