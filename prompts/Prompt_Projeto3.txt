@@ -1,0 +1,11 @@
+Quero iniciar o Projeto 3: KAURA-DOC-AI-SEC (Integração com Azure Key Vault).
+
+Premissas do Portfólio:
+
+Continuarei usando o repositório KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO.
+
+Manterei o CI/CD (GitHub Actions) e o FinOps (Custo Zero Estrutural).
+
+Direcionamento: Preciso de ajuda para focar na camada de segurança: a) Qual é o comando Azure CLI para provisionar o Key Vault (Fase 1) e armazenar a chave do Document Intelligence nele? b) Qual é o código Python atualizado que usarei para acessar o Key Vault de dentro do meu script (analyze_doc_ai.py), buscando a chave? c) Como devo atualizar o SETUP.md para documentar o passo de criação do Key Vault e a regra de permissão?
+
+Vamos focar em substituir o uso direto do GitHub Secrets pelo acesso ao Key Vault.
