@@ -29,12 +29,17 @@ az role assignment create \
     --assignee 3351acd5-3910-4697-884c-759b1836aa8d \
     --scope /subscriptions/581e9cfb-c00e-4754-9a01-2845c83d1e4b
 ```
-Passo 2: Configurar a Credencial de Identidade Federada (OIDC)
+### Passo 2: Configurar a Credencial de Identidade Federada (OIDC)
 Cria a ponte de confiança, usando o ambiente dev configurado no seu YAML.
 
-Configurações Necessárias: | Campo | Valor | | :--- | :--- | | Issuer (Emissor) | https://token.actions.githubusercontent.com | | Subject Identifier | repo:monicacruzs/KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO:environment:dev |
+**Configurações Necessárias:**
 
-Comando Azure CLI:
+| Campo | Valor |
+| :--- | :--- |
+| **Issuer (Emissor)** | `https://token.actions.githubusercontent.com` |
+| **Subject Identifier** | `repo:monicacruzs/KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO:environment:dev` |
+
+**Comando Azure CLI:**
 ```bash
 az ad app federated-credential create \
     --id 3351acd5-3910-4697-884c-759b1836aa8d \
@@ -48,10 +53,11 @@ Nota: Microsoft Entra ID ->  App Registrations ->  View all aplication in the di
 🔒 III. Configuração do Key Vault
 Movemos a KEY do Document Intelligence para o Key Vault.
 
-Passo 3: Definir Política de Acesso no Key Vault
+### Passo 3: Definir Política de Acesso no Key Vault
 Concede a permissão Get (Obter Segredo) ao SP (3351acd5-3910-4697-884c-759b1836aa8d).
 
-Comando Azure CLI:
+**Comando Azure CLI:**
+
 ``` bash
 # Assumindo que o Key Vault se chama 'kvkauradocaisecprod002'
 az keyvault set-policy \
@@ -59,10 +65,10 @@ az keyvault set-policy \
     --spn 3351acd5-3910-4697-884c-759b1836aa8d \
     --secret-permissions get
 ```
-⚙️ IV. Alterações no main.yml
+### Passo 4: Alterações no main.yml
 As alterações concentraram-se na seção de login e na definição das variáveis de ambiente.
 
-1. Correção e Estrutura Final do Login OIDC
+**1. Correção e Estrutura Final do Login OIDC**
 A estrutura final no seu main.yml é a seguinte (usando o Secret para o Tenant ID, que é a melhor prática):
 
 ```yaml
