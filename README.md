@@ -61,11 +61,12 @@ A confiança moderada ocorre frequentemente, mesmo que o resultado esteja corret
 O fato de o dado ter sido validado significa que pode ser usado, mas a regra de negócio do IDP sugere:
 * Se o limite de confiança para processamento automático for, digamos, 70%, o campo `CustomerName` deve ser **sinalizado para revisão manual**.
 * Para aprimoramento, pode-se treinar um **Modelo Personalizado** que se adapte especificamente ao layout desse fornecedor, aumentando a confiança para 90% ou mais em execuções futuras.
+* 
+### ➡️ Projeto 1: Extração de Layout (OCR/Texto Puro)
+Focado na extração bruta de texto (OCR) e informações de layout. Este projeto gera um Artefato de saída TXT e é ideal para documentos não estruturados como listas ou notas simples.
 
-| Projeto | Nome | Objetivo Principal | Modelo Azure DI | Script de Execução | Output Persistido |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Projeto 1** | DOC-AI-HUMANO | Extração de **texto bruto e layout** para validação de OCR. | `prebuilt-layout` | `--model-id prebuilt-layout` | **TXT (Artefato)** |
-| **Projeto 2** | **KAURA-DOC-AI-FIN** | **Automatizar a extração de dados financeiros de Faturas (InvoiceId, Total, Cliente).** | **`prebuilt-invoice`** | **`--model-id prebuilt-invoice`** | **JSON (Artefato)** |
+### ➡️ Projeto 2: Extração de Campos Chave-Valor
+Focado na extração de pares chave-valor para dados semi-estruturados, como notas fiscais ou recibos, usando modelos pré-construídos que mapeiam dados específicos.
 
 ### ⚙️ Execução e Acesso ao Output (CI/CD)
 
