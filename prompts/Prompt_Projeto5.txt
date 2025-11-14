@@ -1,0 +1,21 @@
+Quero iniciar o Projeto 4: KAURA-DOC-AI-CUSTOM (Modelo Customizado).
+
+Premissas do Portfólio:
+* Continuaremos usando o repositório **KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO**.
+* O Key Vault (Projeto 3) e o **FinOps (Custo Zero)** são a base.
+* Nosso objetivo é treinar um modelo próprio para extrair dados de um documento não-padrão.
+
+Direcionamento **(Ajustado para MLOps e FinOps)**:
+
+**1. Estratégia de Arquitetura e Custo:**
+   * **Adote a metodologia MLOps Efêmero (Provisionar, Executar, Desprovisionar - *Run-Tear-down*).**
+   * **Priorize o uso exclusivo da Camada Gratuita (Free Tier)** para qualquer recurso de processamento (Document Intelligence Analysis) e o **mínimo de armazenamento** para aderência ao FinOps Custo Zero.
+   * **Confirme a estratégia de Repositório/Arquivos:** O repositório **KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO** será mantido. Como devemos lidar com `SETUP.md` (atualizar) e `codigo.py` (criar `analyze_custom.py` ou modificar o existente)?
+
+**2. Estrutura do Processo de ML (Foco no Fluxo de Custo):**
+   * **a) Fluxo sem Custo (Treinamento):** Qual é o passo a passo de alto nível (simulando o Studio) para o treinamento, garantindo que o treinamento em si é gratuito?
+   * **b) Fluxo com Custo/Execução Efêmera:** Qual deve ser a ordem de execução no CI/CD (Provisionamento do Storage -> Execução do Teste -> Desprovisionamento do Storage) para minimizar o custo?
+   * **c) Código Python Efêmero:** Qual é o código Python atualizado (`analyze_custom.py`) para usar o modelo customizado (`model_id`), garantindo que ele use a chave do Key Vault e seja otimizado para um teste rápido e limitado (Free Tier)?
+   * **d) Documentação de Permissões:** Como devo atualizar o `SETUP.md` para documentar o processo de treinamento e as regras de permissão **Efêmeras** necessárias no Storage para o treinamento/teste?
+
+Vamos focar no ciclo de vida de Machine Learning, da criação à execução via CI/CD, priorizando a economia de custos.
