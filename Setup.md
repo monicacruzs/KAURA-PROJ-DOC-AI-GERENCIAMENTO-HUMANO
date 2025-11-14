@@ -500,6 +500,53 @@ Em Resumo:
 | **Repositório** | Criado previamente no GitHub Web | Subentendido pelo `git clone` e `git push`. |
 
 ---
+## 4. ⚙️ Projeto KAURA-DOC-AI-CUSTOM (Modelo Customizado)
+
+Este projeto foca no treinamento de um modelo customizado para extrair dados de documentos não-padrão específicos do negócio (ex: formulário X, contrato Y).
+
+### 4.1. 💾 Configuração do Azure Storage para Treinamento
+
+O modelo customizado requer dados de treinamento armazenados em um contêiner específico no Azure Blob Storage.
+
+| Recurso | Tipo | Descrição |
+| :--- | :--- | :--- |
+| **Conta de Storage** | Blob Storage (v2) | A mesma conta de Storage utilizada para entrada/saída de documentos (FinOps: Custo Zero). |
+| **Contêiner** | `kaura-training-data` | Contêiner dedicado para armazenar os documentos de treinamento rotulados. |
+| **Conteúdo** | `*.pdf`, `*.jpg`, `*.png` + arquivos `.json` de rótulo | Mínimo de **5 documentos** rotulados por tipo de documento customizado. |
+
+### 4.2. 🤖 Processo de Treinamento no Document Intelligence Studio
+
+O treinamento é realizado manualmente no Azure AI Document Intelligence Studio.
+
+1.  **Acessar o Studio:** Navegar para o [Azure AI Document Intelligence Studio](https://formrecognizer.appliedai.azure.com/studio).
+2.  **Criar Projeto:**
+    * Selecionar **Modelos customizados** > **Criar um projeto**.
+    * Ligar o projeto ao Recurso do Document Intelligence e ao Contêiner (`kaura-training-data`).
+3.  **Rotulagem:** Fazer ou revisar a rotulagem dos campos no conjunto de documentos.
+4.  **Treinamento:** Clicar em **Treinar**.
+    * **Definir `Model ID` (Crucial):** O ID deve seguir o padrão `kaura-custom-seunome-vN` (ex: `kaura-custom-contrato-v1`).
+    * **Modo de Treinamento:** Usar **Template** (para <10 docs e consistentes) ou **Neural** (para >10 docs e variados).
+    * **Saída:** O `Model ID` treinado deve ser registrado no **Key Vault** como segredo para uso pelo pipeline de CI/CD.
+
+### 4.3. 🔐 Regras de Permissão de Acesso (RBAC)
+
+Para que o Recurso do Document Intelligence possa **ler** os documentos do Storage para o treinamento, é necessária uma atribuição de função (Role-Based Access Control - RBAC).
+
+| Principal (Quem precisa da permissão) | Escopo (Onde a permissão se aplica) | Função (Qual permissão é concedida) | Descrição |
+| :--- | :--- | :--- | :--- |
+| **Identidade Gerenciada do Recurso Document Intelligence** | Conta de Azure Storage | **Blob Storage Data Reader** | Permite que o serviço leia os blobs (documentos e rótulos) necessários para o treinamento. |
+| **Usuário/ML Engineer (Para rotulagem e treinamento manual)** | Conta de Azure Storage | **Storage Blob Data Contributor** | Permite o upload/download de documentos de treinamento e arquivos de rótulo (`.json`). |
+
+**Passos para Configurar:**
+1.  Vá para a Conta de Storage.
+2.  Acesse **Controle de Acesso (IAM)**.
+3.  Clique em **Adicionar** > **Adicionar atribuição de função**.
+4.  Selecione a função **Blob Storage Data Reader**.
+5.  Em **Membros**, selecione **Identidade gerenciada** e escolha o Recurso de Document Intelligence.
+
+**Nota FinOps (Custo Zero):** A permissão é temporária para o treinamento, mas a Identidade Gerenciada é a forma mais segura e recomendada de acesso.
+
+---
 
 ## 3. FASE 3: DESPROVISIONAMENTO E ESTRATÉGIA FINOPS (CUSTO ZERO ESTRUTURAL)
 
