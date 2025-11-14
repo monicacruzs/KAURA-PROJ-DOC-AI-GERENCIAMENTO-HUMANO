@@ -59,3 +59,54 @@ Resumo para o Portfólio KAURA
 Fase/Recurso,Recurso Pago?,Custo Estimado (Portfólio),Estratégia FinOps (Custo Zero) Treinamento do Modelo,NÃO,Zero,(Treinamento é gratuito) Azure Storage,SIM,Centavos/mês,Manter baixo volume de dados de treinamento. Execução da Análise,SIM,Zero (se usar Free Tier ou testes limitados),Utilizar a camada gratuita e limitar a análise a testes de validação.
 
 Conclusão: Você pode executar o Projeto 4 com custo muito próximo de zero, desde que utilize a camada gratuita do Azure AI Document Intelligence e mantenha seu volume de dados de treinamento no Storage baixo. O único custo significativo seria o de análise em um cenário de produção com alto volume de documentos.
+
+Passo a Passo:
+1. 📂 Preparação do Conjunto de Dados de Treinamento
+O objetivo é garantir que você tenha a quantidade mínima necessária de documentos rotulados para iniciar o treinamento.
+
+1.1. Coleta e Rotulagem dos Documentos
+Ação: Reúna seus documentos não-padrão (mínimo de 5, idealmente 10-15 para maior precisão, especialmente se usar o modo Neural).
+
+Formato: Salve-os em um formato aceito (ex: PDF, JPG, PNG).
+
+Rotulagem:
+
+Opção A (Recomendada): Faça a rotulagem diretamente no Azure AI Document Intelligence Studio. Isso garante que os campos e os arquivos de rótulo .json sejam gerados corretamente e associados aos documentos.
+
+Opção B: Se for usar uma ferramenta externa, garanta que os arquivos .json de rótulo sejam gerados e estejam prontos para upload.
+
+1.2. Estratégia do Recurso Persistente (Custo Zero)
+Recurso: O Azure AI Document Intelligence Resource é o seu recurso persistente.
+
+Ação: Garanta que ele esteja na camada gratuita (Free Tier) para não incorrer em custos de análise futura.
+
+Artefato Chave: É essencial que a Identidade Gerenciada deste recurso já tenha a função Blob Storage Data Reader atribuída à sua Conta de Storage, conforme documentado no SETUP.md. Isso é o que permite o treinamento.
+
+2. 🤖 Treinamento e Geração do model_id (Passo Sem Custo)
+Com os documentos prontos, você pode realizar o treinamento.
+
+2.1. Fluxo de Ação no Studio
+Acesse o Studio: Navegue até o Azure AI Document Intelligence Studio.
+
+Crie o Projeto:
+
+Crie um novo projeto customizado e conecte-o à sua Conta de Storage e ao Contêiner onde os documentos de treinamento estão localizados.
+
+Upload/Rotulagem: Se ainda não o fez, use a interface para fazer o upload e a rotulagem dos documentos. Verifique se todos os documentos estão rotulados.
+
+Treinar:
+
+Clique em Treinar (Train).
+
+Defina um Model ID claro (ex: kaura-custom-seunome-v1).
+
+Escolha o Modo de Treinamento (Template ou Neural).
+
+Sucesso: Aguarde o treinamento ser concluído.
+
+2.2. Ação Imediata após o Sucesso
+Após o sucesso do treinamento:
+
+1. Obtenha o Artefato: Registre o Model ID que foi gerado. Este é o seu artefato de ML mais importante.
+
+2. Atualize o Key Vault: Armazene o Model ID no seu Key Vault (Projeto 3) como um segredo. Isso garante que o analyze_custom.py e o pipeline de CI/CD possam acessá-lo com segurança para a fase de execução.
