@@ -43,6 +43,20 @@ MODEL_CONFIG = {
             "InvoiceTotal": "Total da Fatura"
         },
         "output_file": "dados_fatura_extraidos.json"
+    },
+    # --- NOVO MODELO CUSTOMIZADO DE VIAGEM ---
+    "kaura-custom-viagem-v4": {
+        "description": "Extração de Campos Customizados de Viagem (Neural v4).",
+        "path": "dados/documento_viagem_teste.pdf", # Crie um novo PDF de teste nesta pasta
+        "extract_fields": {
+            "Nome_do_Colaborador": "Nome",
+            "Centro_de_Custo": "Centro de Custo",
+            "Data_de_Inicio_da_Viagem": "Início da Viagem",
+            "Data_de_Fim_da_Viagem": "Fim da Viagem",
+            "Valor_Total_Aprovado": "Valor Total",
+            "Status_de_Aprovacao": "Status de Aprovação"
+        },
+        "output_file": "dados_viagem_extraidos.json" 
     }
 }
 
@@ -113,6 +127,54 @@ def analyze_document(model_id, document_path):
             
         print(f"\n--- Resultado da Análise ({config['description']}) ---")
         
+        
+        # ------------------------------------------------------------------
+        # 3. Lógica de Extração e Output (Projeto 4: Modelos Estruturados: Faturas OU Customizados)
+        # ------------------------------------------------------------------
+        if config['extract_fields']:
+            dados_extraidos = {}
+            
+            if result.documents:
+                doc = result.documents[0]
+                
+                # --- Lógica de loop e extração dos campos (A SER INSERIDA) ---
+                print("Extraindo os campos do documento...")
+                
+                for field_name, friendly_name in config['extract_fields'].items():
+                    field = doc.fields.get(field_name)
+                    
+                    if field:
+                        # Extrai o valor do campo e sua confiança
+                        value = field.value
+                        confidence = field.confidence
+                        
+                        # Converte para string para salvar no JSON, se necessário
+                        if hasattr(value, 'isoformat'): # Trata datas/tempos
+                            value = value.isoformat()
+                            
+                        dados_extraidos[field_name] = {
+                            "valor": value,
+                            "confianca": f"{confidence:.2f}"
+                        }
+                        
+                        # Imprime no console para debug
+                        print(f"  {friendly_name}: {value} (Confiança: {confidence:.2f})")
+                        
+                    else:
+                        print(f"  {friendly_name}: (Não encontrado)")
+                        dados_extraidos[field_name] = {"valor": None, "confianca": "0.00"}
+
+                # --- 4. Salvar em JSON (para Artefato do Projeto) ---
+                if config['output_file']:
+                    # Certifica que o diretório 'dados/' existe
+                    os.makedirs(os.path.dirname(config['output_file']), exist_ok=True) 
+                    with open(config['output_file'], "w", encoding="utf-8") as f:
+                        json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
+                    print(f"\n✅ Resultado da extração salvo para Artefato: {config['output_file']}")
+                    
+            else:
+                print(f"Nenhum documento do tipo '{model_id}' detectado no arquivo.")
+                
         # ------------------------------------------------------------------
         # 3. Lógica de Extração e Output (Modelos Estruturados: Projeto 2 - Faturas)
         # ------------------------------------------------------------------
