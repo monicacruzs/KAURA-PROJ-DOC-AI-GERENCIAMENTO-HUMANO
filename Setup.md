@@ -613,31 +613,16 @@ A infraestrutura está completa.
 A adaptação é mínima. O principal a ser feito é:
 
 1. Adicionar o modelo kaura-custom-viagem-v4 ao dicionário MODEL_CONFIG.
-
 2. Incluir a lógica de extração para os 6 campos dentro da função analyze_document.
+3. Configurar o GitHub Actions
 
 ---
 
-## 1. Adaptação do Ambiente: Onde Rodar?
-
-| Ambiente | Prós | Contras | Recomendação |
-| :--- | :--- | :--- | :--- |
-| Máquina Local | ✅ Desenvolvimento e testes rápidos. Basta definir as variáveis de ambiente (Endpoint) e ter credenciais para o Key Vault (como estar logado via Azure CLI). | ❌ Não é o fluxo final de produção. Exige configuração local.| Use para testes iniciais e validação do código.
-|GitHub Actions / CI/CD | ✅ É o fluxo de **produção/MLOps**. Garante a execução automatizada em um ambiente controlado.| ❌ O setup inicial de permissões (MSI) para o Key Vault é mais complexo.| Use para o ambiente final e automação.
-
-**Para o desenvolvimento e validação do código, você pode rodar na sua máquina local. Basta garantir que você tenha:**
-
-1. O arquivo `.env` com a variável `AZURE_FORM_RECOGNIZER_ENDPOINT`.
-
-2. O arquivo de teste (ex: `documento_viagem_teste.pdf`) na pasta `dados/`.
-
-3. As permissões do Azure (via `az login` no terminal) para acessar o Key Vault.
-
-## 2. Código Python Adaptado (`analyze_doc_ai.py`)
+## Código Python Adaptado (`analyze_doc_ai.py`)
 
 Abaixo está o código atualizado. Substitua todo o seu dicionário `MODEL_CONFIG` e a lógica de extração de campos dentro da função `analyze_document`.
 
-### A. Modificação do `MODEL_CONFIG`
+### 1. Modificação do `MODEL_CONFIG`
 Adicione a configuração do seu modelo personalizado `kaura-custom-viagem-v4` ao dicionário `MODEL_CONFIG`, juntamente com os 6 campos que você treinou:
 
 Python
@@ -683,7 +668,7 @@ MODEL_CONFIG = {
 
 **Ação:** Lembre-se de colocar um documento de teste de viagem (por exemplo, o `KAURA_03.pdf`) na sua pasta `dados/` e renomeá-lo para `documento_viagem_teste.pdf` ou ajustar o campo `path`no `MODEL_CONFIG`.
 
-### B. Modificação da Lógica de Extração
+### 2. Modificação da Lógica de Extração
 Substitua o trecho `... (Lógica de loop e extração dos campos) ...` dentro da função `analyze_document` pela lógica abaixo para extrair corretamente os 6 campos e salvar no JSON:
 
 Python
@@ -746,17 +731,41 @@ Python
 
 ```
 
-## 3. Como Rodar no Terminal
-Para testar seu novo modelo customizado, use o argumento `--model-id `com o ID que você definiu:
+## 3. Como Configurar o GitHub Actions
+Para que o GitHub Actions consiga rodar o script e acessar o Key Vault, você precisa garantir que a **Identidade do GitHub** (o Service Principal) tenha permissão de **leitura (Get Secret)** no seu Key Vault.
+
+O próximo passo seria:
+
+1. **Criar/Verificar o Service Principal:** Garanta que o seu Service Principal (o "usuário" do Azure para o GitHub) está criado e sincronizado.
+2. **Atribuir Permissão no Key Vault:** Ir no seu Key Vault (`kvkauradocaisecprod002`) e adicionar a permissão "Get" (Obter) de Secrets para o Service Principal.
+3. **Configurar o Workflow:** Ajustar o arquivo `.yml `do GitHub Actions para incluir o passo que executa o python `analyze_doc_ai.py --model-id kaura-custom-viagem-v4`.
+
+**🚀 Fluxo de Ação: Do Código ao GitHub Actions**
+Para que seu script `analyze_doc_ai.py` funcione no GitHub Actions, a principal barreira é a autenticação para acessar o Key Vault (`kvkauradocaisecprod002.vault.azure.net`).
+
+O fluxo ideal é:
+
+1. Otimização do Setup de Segurança (Melhor Prática): Configurar o GitHub para usar a Workload Identity Federation para se conectar ao Azure. Isso elimina a necessidade de armazenar um segredo de Longa Duração (Service Principal Key) no GitHub, usando identidades de curta duração baseadas em certificados OpenID Connect (OIDC).
+2. Permissão no Key Vault: Dar ao "usuário" do GitHub (a Workload Identity) permissão para ler (Get) o segredo `document-intelligence-key`.
+3. Execução do Workflow: Adicionar o passo no arquivo `.yml` que executa o `python analyze_doc_ai.py --model-id kaura-custom-viagem-v4`.
+
+### Configurar a Identidade OIDC
+Para manter a segurança e a automação, vamos configurar a conexão segura via OIDC.
+
+Você precisa de dois comandos principais no Azure CLI para criar a identidade que o GitHub vai usar. **Você consegue rodar estes comandos no seu terminal, autenticado via** `az login`?
+
+**1. Atribuição da Função de Acesso**
+Vamos dar permissão de leitor e de acesso ao Key Vault para a sua identidade de pipeline (substitua a `{resource-group-name} `pelo nome do seu grupo de recursos, onde o Key Vault e o Document Intelligence estão):
 
 Bash
 ```Bash
+# Se o seu Service Principal já existe, você pode pular este comando
+# Se não, substitua {resource-group-name} pelo nome correto
+az role assignment create --role "Reader" --assignee <CLIENT_ID_DO_SERVICE_PRINCIPAL> --scope /subscriptions/<SUBSCRIPTION_ID>/resourceGroups/{resource-group-name}
 
-# Lembre-se de configurar seu terminal para acessar as chaves do Key Vault
-# (Exemplo: executar 'az login' se for rodar localmente)
-
-python analyze_doc_ai.py --model-id kaura-custom-viagem-v4
-
+# Dê permissão de acesso ao Key Vault (GET Secrets) para o Service Principal
+# Substitua o nome do Key Vault e o ID do Service Principal
+az keyvault set-policy --name kvkauradocaisecprod002 --secret-permissions get --spn <CLIENT_ID_DO_SERVICE_PRINCIPAL>
 ```
 
 ## 3. FASE 3: DESPROVISIONAMENTO E ESTRATÉGIA FINOPS (CUSTO ZERO ESTRUTURAL)
