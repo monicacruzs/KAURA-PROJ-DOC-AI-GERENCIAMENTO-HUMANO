@@ -607,7 +607,157 @@ Clique no contêiner kaura-training-data.
 Utilize o botão Upload para carregar os seus 9 documentos PDF (incluindo o documento de teste de robustez com a simulação de mancha de café).
 
 A infraestrutura está completa.
+
+## Após o Treino e Teste no Document Intelligence Studio vamos integrar a chamada para uma API
+
+A adaptação é mínima. O principal a ser feito é:
+
+1. Adicionar o modelo kaura-custom-viagem-v4 ao dicionário MODEL_CONFIG.
+
+2. Incluir a lógica de extração para os 6 campos dentro da função analyze_document.
+
 ---
+
+## 1. Adaptação do Ambiente: Onde Rodar?
+
+| Ambiente | Prós | Contras | Recomendação |
+| :--- | :--- | :--- | :--- |
+| Máquina Local | ✅ Desenvolvimento e testes rápidos. Basta definir as variáveis de ambiente (Endpoint) e ter credenciais para o Key Vault (como estar logado via Azure CLI). | ❌ Não é o fluxo final de produção. Exige configuração local.| Use para testes iniciais e validação do código.
+|GitHub Actions / CI/CD | ✅ É o fluxo de **produção/MLOps**. Garante a execução automatizada em um ambiente controlado.| ❌ O setup inicial de permissões (MSI) para o Key Vault é mais complexo.| Use para o ambiente final e automação.
+
+**Para o desenvolvimento e validação do código, você pode rodar na sua máquina local. Basta garantir que você tenha:**
+
+1. O arquivo `.env` com a variável `AZURE_FORM_RECOGNIZER_ENDPOINT`.
+
+2. O arquivo de teste (ex: `documento_viagem_teste.pdf`) na pasta `dados/`.
+
+3. As permissões do Azure (via `az login` no terminal) para acessar o Key Vault.
+
+## 2. Código Python Adaptado (`analyze_doc_ai.py`)
+
+Abaixo está o código atualizado. Substitua todo o seu dicionário `MODEL_CONFIG` e a lógica de extração de campos dentro da função `analyze_document`.
+
+### A. Modificação do `MODEL_CONFIG`
+Adicione a configuração do seu modelo personalizado `kaura-custom-viagem-v4` ao dicionário `MODEL_CONFIG`, juntamente com os 6 campos que você treinou:
+
+Python
+```Python
+# ... (código anterior) ...
+
+# Define as configurações de caminho e extração para cada modelo
+MODEL_CONFIG = {
+    "prebuilt-layout": {
+        "description": "Extração de Layout e Texto Puro.",
+        "path": "dados/documento-teste.jpeg", 
+        "extract_fields": False,
+        "output_file": "dados_layout_extraidos.txt" 
+    },
+    "prebuilt-invoice": {
+        "description": "Extração de Campos de Fatura.",
+        "path": "dados/fatura-teste.pdf",
+        "extract_fields": {
+            "InvoiceId": "ID da Fatura",
+            "CustomerName": "Nome do Cliente",
+            "InvoiceTotal": "Total da Fatura"
+        },
+        "output_file": "dados_fatura_extraidos.json"
+    },
+    # --- NOVO MODELO CUSTOMIZADO DE VIAGEM ---
+    "kaura-custom-viagem-v4": {
+        "description": "Extração de Campos Customizados de Viagem (Neural v4).",
+        "path": "dados/documento_viagem_teste.pdf", # Crie um novo PDF de teste nesta pasta
+        "extract_fields": {
+            "Nome_do_Colaborador": "Nome",
+            "Centro_de_Custo": "Centro de Custo",
+            "Data_de_Inicio_da_Viagem": "Início da Viagem",
+            "Data_de_Fim_da_Viagem": "Fim da Viagem",
+            "Valor_Total_Aprovado": "Valor Total",
+            "Status_de_Aprovacao": "Status de Aprovação"
+        },
+        "output_file": "dados_viagem_extraidos.json" 
+    }
+}
+# ... (resto do código) ...
+
+```
+
+**Ação:** Lembre-se de colocar um documento de teste de viagem (por exemplo, o `KAURA_03.pdf`) na sua pasta `dados/` e renomeá-lo para `documento_viagem_teste.pdf` ou ajustar o campo `path`no `MODEL_CONFIG`.
+
+### B. Modificação da Lógica de Extração
+Substitua o trecho `... (Lógica de loop e extração dos campos) ...` dentro da função `analyze_document` pela lógica abaixo para extrair corretamente os 6 campos e salvar no JSON:
+
+Python
+```Python
+# ... (dentro da função analyze_document) ...
+        
+        # ------------------------------------------------------------------
+        # 3. Lógica de Extração e Output (Modelos Estruturados: Faturas OU Customizados)
+        # ------------------------------------------------------------------
+        if config['extract_fields']:
+            dados_extraidos = {}
+            
+            if result.documents:
+                doc = result.documents[0]
+                
+                # --- Lógica de loop e extração dos campos (A SER INSERIDA) ---
+                print("Extraindo os campos do documento...")
+                
+                for field_name, friendly_name in config['extract_fields'].items():
+                    field = doc.fields.get(field_name)
+                    
+                    if field:
+                        # Extrai o valor do campo e sua confiança
+                        value = field.value
+                        confidence = field.confidence
+                        
+                        # Converte para string para salvar no JSON, se necessário
+                        if hasattr(value, 'isoformat'): # Trata datas/tempos
+                            value = value.isoformat()
+                            
+                        dados_extraidos[field_name] = {
+                            "valor": value,
+                            "confianca": f"{confidence:.2f}"
+                        }
+                        
+                        # Imprime no console para debug
+                        print(f"  {friendly_name}: {value} (Confiança: {confidence:.2f})")
+                        
+                    else:
+                        print(f"  {friendly_name}: (Não encontrado)")
+                        dados_extraidos[field_name] = {"valor": None, "confianca": "0.00"}
+
+                # --- 4. Salvar em JSON (para Artefato do Projeto) ---
+                if config['output_file']:
+                    # Certifica que o diretório 'dados/' existe
+                    os.makedirs(os.path.dirname(config['output_file']), exist_ok=True) 
+                    with open(config['output_file'], "w", encoding="utf-8") as f:
+                        json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
+                    print(f"\n✅ Resultado da extração salvo para Artefato: {config['output_file']}")
+                    
+            else:
+                print(f"Nenhum documento do tipo '{model_id}' detectado no arquivo.")
+                
+        # ------------------------------------------------------------------
+        # 3. Lógica de Extração e Output (Modelos de Layout: Projeto 1 - Layout/OCR)
+        # ------------------------------------------------------------------
+        else: # Entra aqui se config['extract_fields'] é False
+            # ... (seu código de extração de layout continua aqui) ...
+# ... (fim da função analyze_document) ...
+
+```
+
+## 3. Como Rodar no Terminal
+Para testar seu novo modelo customizado, use o argumento `--model-id `com o ID que você definiu:
+
+Bash
+```Bash
+
+# Lembre-se de configurar seu terminal para acessar as chaves do Key Vault
+# (Exemplo: executar 'az login' se for rodar localmente)
+
+python analyze_doc_ai.py --model-id kaura-custom-viagem-v4
+
+```
 
 ## 3. FASE 3: DESPROVISIONAMENTO E ESTRATÉGIA FINOPS (CUSTO ZERO ESTRUTURAL)
 
