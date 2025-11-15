@@ -546,6 +546,67 @@ Para que o Recurso do Document Intelligence possa **ler** os documentos do Stora
 
 **Nota FinOps (Custo Zero):** A permissão é temporária para o treinamento, mas a Identidade Gerenciada é a forma mais segura e recomendada de acesso.
 
+🏗️ SETUP.md: Provisionamento de Infraestrutura (FinOps e MLOps)
+Este guia detalha os passos para provisionar a infraestrutura e configurar as permissões, garantindo o mínimo custo (FinOps) e a rastreabilidade (MLOps).
+
+📝 Pré-requisito
+Assuma que o Resource Group (RG-KAURA-DOC-AI) e o recurso de Document Intelligence (kaura-doc-ai-service-05) já estão criados.
+
+Passo 1: Ativação da Identidade Gerenciada (Passo OBRIGATÓRIO)
+A identidade gerenciada deve ser ativada antes de configurar o RBAC.
+
+Navegue para o seu recurso de Document Intelligence: kaura-doc-ai-service-05.
+
+No menu lateral, clique em Identity.
+
+Na aba System assigned, mude o status para On (Ligado) e clique em Save.
+
+Passo 2: Criação da Conta de Storage e Contêiner (FinOps)
+Devido ao erro persistente SubscriptionNotFound no Azure CLI, este passo será executado via Portal Azure.
+
+Crie a Conta de Storage kauradocaitrg002 no Portal Azure.
+
+Project details: Use o Resource Group RG-KAURA-DOC-AI.
+
+Instance details:
+
+Storage account name: kauradocaitrg002.
+
+Region: South America - Brazil South.
+
+Redundancy (FinOps): Configure a Redundancy como Locally-redundant storage (LRS).
+
+Após a criação, navegue até a Conta de Storage kauradocaitrg002 e vá para Containers.
+
+Crie o contêiner de treinamento: kaura-training-data (Nível de acesso Private).
+
+Passo 3: Atribuição de Permissões RBAC (IAM)
+Este passo concede permissão de leitura ao Document Intelligence para acessar os documentos.
+
+Navegue para a Conta de Storage kauradocaitrg002.
+
+Vá para Access control (IAM) e clique em + Add role assignment.
+
+Role (Função): Selecione Storage Blob Data Reader.
+
+Member (Membro):
+
+Selecione Managed identity.
+
+Pesquise e selecione o recurso kaura-doc-ai-service-05 (Document Intelligence).
+
+Finalize a atribuição em Review + assign.
+
+💾 Passo 4: Upload dos Dados de Treinamento
+Com a infraestrutura pronta, carregue os 9 documentos PDF para o contêiner.
+
+Navegue para a Conta de Storage kauradocaitrg002 > Containers.
+
+Clique no contêiner kaura-training-data.
+
+Utilize o botão Upload para carregar os seus 9 documentos PDF (incluindo o documento de teste de robustez com a simulação de mancha de café).
+
+A infraestrutura está completa.
 ---
 
 ## 3. FASE 3: DESPROVISIONAMENTO E ESTRATÉGIA FINOPS (CUSTO ZERO ESTRUTURAL)
