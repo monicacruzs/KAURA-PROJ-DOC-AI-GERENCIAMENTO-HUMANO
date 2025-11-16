@@ -41,28 +41,51 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # --- AUTENTICAÇÃO SEGURA COM OIDC ---
-      - name: Azure Login via OIDC
+      - name: 🔑 Azure Login (via AZURE_CREDENTIALS Secret)
+        # Recomendo usar o AZURE_CREDENTIALS que você gerou, trocando este passo de OIDC
         uses: azure/login@v1
         with:
-          client-id: 3351acd5-3910-4697-884c-759b1836aa8d
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: 581e9cfb-c00e-4754-9a01-2845c83d1e4b
-          
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       # --- DEFINIÇÃO DO ENDPOINT E KEY VAULT URI (Variáveis de ambiente) ---
-      # O script Python vai ler estas variáveis
+      - name: Set Environment Variables
+        run: |
+          # ENDPOINT (Via Secret)
+          echo "AZURE_FORM_RECOGNIZER_ENDPOINT=${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}" >> $GITHUB_ENV
+          # URI do Key Vault (Via Secret) - Agora incluído
+          echo "AZURE_KEY_VAULT_URI=${{ secrets.AZURE_KEY_VAULT_URI }}" >> $GITHUB_ENV
+
+      # --- CRÍTICO: PREPARAÇÃO DE DADOS CONDICIONAL ---
+      - name: 📂 Prepare Input Data
+        run: |
+          # Cria a pasta de dados que o analyze_doc_ai.py espera
+          mkdir -p dados
+          
+          # Determina o arquivo de entrada com base no modelo selecionado
+          case ${{ github.event.inputs.model_to_run }} in
+            "kaura-custom-viagem-v4")
+              # Certifique-se que o seu PDF de teste de viagem está na raiz
+              cp KAURA_03.pdf dados/documento_viagem_teste.pdf
+              ;;
+            "prebuilt-invoice")
+              # Certifique-se que o seu PDF de teste de fatura está na raiz
+              cp fatura-teste.pdf dados/fatura-teste.pdf
+              ;;
+            "prebuilt-layout")
+              # Certifique-se que o seu JPEG/PDF de teste de layout está na raiz
+              cp documento-teste.jpeg dados/documento-teste.jpeg
+              ;;
+          esac
 
       - name: 🏃 Execute Document Analysis
         run: |
-          # Use o parâmetro passado pelo usuário
+          # Usa o parâmetro de entrada para executar o script
           MODEL_ID=${{ github.event.inputs.model_to_run }}
           python src/analyze_doc_ai.py --model-id $MODEL_ID
-          
-      - name: Execute Document Analysis
-        run: python src/analyze_doc_ai.py --model-id prebuilt-invoice
 
       - name: Upload Artifacts (Output JSON/TXT)
         uses: actions/upload-artifact@v4
         with:
-          name: analysis-output
-          path: outputs/
+          name: analysis-output-${{ github.event.inputs.model_to_run }}
+          # Path é o local onde o seu analyze_doc_ai.py salva o output (dados/ ou outputs/)
+          path: dados/
