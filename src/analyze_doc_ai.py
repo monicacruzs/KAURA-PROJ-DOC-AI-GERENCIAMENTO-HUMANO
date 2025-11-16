@@ -125,11 +125,12 @@ def analyze_document(model_id, document_path):
             result = poller.result() # Esta linha pode gerar exceções de rede/API
             
         print(f"\n--- Resultado da Análise ({config['description']}) ---")
-        
-        
+
         # ------------------------------------------------------------------
-        # 3. Lógica de Extração e Output (Projeto 4: Modelos Estruturados: Faturas OU Customizados)
+        # 3. Lógica de Extração e Output (UNIFICADA)
         # ------------------------------------------------------------------
+
+        # Se for um modelo que extrai campos estruturados (Viagem ou Fatura)
         if config['extract_fields']:
             dados_extraidos = {}
             
@@ -159,23 +160,23 @@ def analyze_document(model_id, document_path):
                              # Geralmente usamos apenas o texto extraído para simplificar
                             valor = field.value.text
                             
-                    
-                    # Adiciona ao dicionário de saída
-                    dados_extraidos[field_name] = {
-                        "valor": valor,
-                        "confianca": round(confianca, 2)
-                    }
-                    
-                    # Imprime no console para debug (como no log que você viu)
-                    print(f"  {friendly_name}: {valor} (Confiança: {round(confianca, 2)})")
                         
-                    else:
+                        # Adiciona ao dicionário de saída (dentro do IF)
+                        dados_extraidos[field_name] = {
+                            "valor": valor,
+                            "confianca": round(confianca, 2)
+                        }
+                        
+                        # Imprime no console para debug
+                        print(f"  {friendly_name}: {valor} (Confiança: {round(confianca, 2)})")
+                            
+                    else: # Este else está AGORA na indentação correta, correspondendo ao 'if field:'
                         print(f"  {friendly_name}: (Não encontrado)")
-                        dados_extraidos[field_name] = {"valor": None, "confianca": "0.00"}
+                        dados_extraidos[field_name] = {"valor": None, "confianca": "0.00"} # Adiciona ao dicionário mesmo que não encontrado
 
-                # --- 4. Salvar em JSON (para Artefato do Projeto) ---
+                # --- 4. Salvar em JSON (para Artefato) ---
                 if config['output_file']:
-                   # ADICIONE ISTO: Cria a pasta 'outputs/' se não existir.
+                    # Cria a pasta 'outputs/' se não existir (garantindo que o salvamento funcione)
                     os.makedirs('outputs/', exist_ok=True)
                     with open(config['output_file'], "w", encoding="utf-8") as f:
                         json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
@@ -184,41 +185,28 @@ def analyze_document(model_id, document_path):
             else:
                 print(f"Nenhum documento do tipo '{model_id}' detectado no arquivo.")
                 
-        # ------------------------------------------------------------------
-        # 3. Lógica de Extração e Output (Modelos Estruturados: Projeto 2 - Faturas)
-        # ------------------------------------------------------------------
-        if config['extract_fields']:
-            dados_extraidos = {}
-            
-            if result.documents:
-                doc = result.documents[0]
-                
-                # ... (Lógica de loop e extração dos campos) ...
-                
-                # --- 4. Salvar em JSON (para Artefato do Projeto 2) ---
-                if config['output_file']:
-                    with open(config['output_file'], "w", encoding="utf-8") as f:
-                        json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
-                    print(f"\n✅ Resultado da extração salvo para Artefato: {config['output_file']}")
-                    
-            else:
-                print(f"Nenhum documento do tipo '{model_id}' detectado no arquivo.")
-                
-        # ------------------------------------------------------------------
-        # 3. Lógica de Extração e Output (Modelos de Layout: Projeto 1 - Layout/OCR)
-        # ------------------------------------------------------------------
-        else: # Entra aqui se config['extract_fields'] é False
+        # Se for um modelo de Layout/OCR (TXT)
+        else: # Este else está no mesmo nível do 'if config['extract_fields']:' inicial
             output_text = ""
-            # ... (Lógica de loop e extração de texto) ...
             
-            # 2. Salvar em TXT (para Artefato do Projeto 1)
+            # --- Lógica de loop e extração de texto (Layout) ---
+            if result.pages:
+                for page in result.pages:
+                    if page.lines:
+                        # Extrai o texto de cada linha e adiciona quebra de linha
+                        output_text += "\n".join([line.content for line in page.lines]) + "\n"
+            
+            print("Conteúdo de texto extraído com sucesso.")
+
+            # --- 4. Salvar em TXT (para Artefato) ---
             if config['output_file']:
+                os.makedirs('outputs/', exist_ok=True)
                 with open(config['output_file'], "w", encoding="utf-8") as f:
                     f.write(output_text)  
                 print(f"\n✅ Resultado do layout salvo para Artefato: {config['output_file']}")
-            
+                
         print("---------------------------------------")
-
+       
     except Exception as e:
         print(f"\nERRO DURANTE A ANÁLISE DO DOCUMENTO: {e}")
 
