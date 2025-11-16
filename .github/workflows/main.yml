@@ -7,7 +7,18 @@ on:
   pull_request:
     branches:
       - main
-
+  workflow_dispatch:
+    inputs:
+      model_to_run:
+        description: 'Selecione o ID do modelo a ser executado'
+        required: true
+        default: 'kaura-custom-viagem-v4'
+        type: choice
+        options:
+          - kaura-custom-viagem-v4
+          - prebuilt-invoice
+          - prebuilt-layout
+          
 # OIDC: Permissão NECESSÁRIA para o Action solicitar o token JWT do GitHub
 permissions:
   id-token: write 
@@ -40,12 +51,12 @@ jobs:
           
       # --- DEFINIÇÃO DO ENDPOINT E KEY VAULT URI (Variáveis de ambiente) ---
       # O script Python vai ler estas variáveis
-      - name: Set Environment Variables
+
+      - name: 🏃 Execute Document Analysis
         run: |
-          # ENDPOINT (Via Secret)
-          echo "AZURE_FORM_RECOGNIZER_ENDPOINT=${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}" >> $GITHUB_ENV
-          # URI do Key Vault (Hardcoded)
-          echo "AZURE_KEY_VAULT_URI=https://kvkauradocaisecprod002.vault.azure.net/" >> $GITHUB_ENV
+          # Use o parâmetro passado pelo usuário
+          MODEL_ID=${{ github.event.inputs.model_to_run }}
+          python src/analyze_doc_ai.py --model-id $MODEL_ID
           
       - name: Execute Document Analysis
         run: python src/analyze_doc_ai.py --model-id prebuilt-invoice
