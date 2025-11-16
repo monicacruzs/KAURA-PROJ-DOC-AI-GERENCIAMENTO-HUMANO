@@ -136,28 +136,38 @@ def analyze_document(model_id, document_path):
             if result.documents:
                 doc = result.documents[0]
                 
-                # --- Lógica de loop e extração dos campos (A SER INSERIDA) ---
+                # --- Lógica de loop e extração dos campos ---
                 print("Extraindo os campos do documento...")
                 
+                # Itera sobre os campos definidos no MODEL_CONFIG
                 for field_name, friendly_name in config['extract_fields'].items():
                     field = doc.fields.get(field_name)
                     
+                    valor = None
+                    confianca = 0.0
+                    
                     if field:
-                        # Extrai o valor do campo e sua confiança
-                        value = field.value
-                        confidence = field.confidence
+                        valor = field.value
+                        confianca = field.confidence if field.confidence is not None else 0.0
                         
-                        # Converte para string para salvar no JSON, se necessário
-                        if hasattr(value, 'isoformat'): # Trata datas/tempos
-                            value = value.isoformat()
+                        # Trata objetos de valor (como datas, números ou objetos complexos)
+                        if hasattr(valor, 'isoformat'): # Trata datas/tempos
+                            valor = valor.isoformat()
+                        elif hasattr(valor, 'text') and valor.text is not None:
+                             valor = valor.text
+                        elif isinstance(valor, dict): # Trata casos em que o valor é um dicionário
+                             # Geralmente usamos apenas o texto extraído para simplificar
+                            valor = field.value.text
                             
-                        dados_extraidos[field_name] = {
-                            "valor": value,
-                            "confianca": f"{confidence:.2f}"
-                        }
-                        
-                        # Imprime no console para debug
-                        print(f"  {friendly_name}: {value} (Confiança: {confidence:.2f})")
+                    
+                    # Adiciona ao dicionário de saída
+                    dados_extraidos[field_name] = {
+                        "valor": valor,
+                        "confianca": round(confianca, 2)
+                    }
+                    
+                    # Imprime no console para debug (como no log que você viu)
+                    print(f"  {friendly_name}: {valor} (Confiança: {round(confianca, 2)})")
                         
                     else:
                         print(f"  {friendly_name}: (Não encontrado)")
