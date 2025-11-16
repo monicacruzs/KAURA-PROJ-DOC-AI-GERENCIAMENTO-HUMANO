@@ -32,7 +32,7 @@ MODEL_CONFIG = {
         "description": "Extração de Layout e Texto Puro.",
         "path": "dados/documento-teste.jpeg", 
         "extract_fields": False,
-        "output_file": "dados_layout_extraidos.txt" 
+        "output_file": "outputs/dados_layout_extraidos.txt" 
     },
     "prebuilt-invoice": {
         "description": "Extração de Campos de Fatura.",
@@ -42,7 +42,7 @@ MODEL_CONFIG = {
             "CustomerName": "Nome do Cliente",
             "InvoiceTotal": "Total da Fatura"
         },
-        "output_file": "dados_fatura_extraidos.json"
+        "output_file": "outputs/dados_fatura_extraidos.json"
     },
     "kaura-custom-viagem-v4": {
         "description": "Extração de Campos Customizados de Viagem (Neural v4).",
@@ -55,7 +55,7 @@ MODEL_CONFIG = {
             "Valor_Total_Aprovado": "Valor Total",
             "Status_de_Aprovacao": "Status de Aprovação"
         },
-        "output_file": "dados_viagem_extraidos.json" 
+        "output_file": "outputs/dados_viagem_extraidos.json" 
     }
 }
 
@@ -165,8 +165,8 @@ def analyze_document(model_id, document_path):
 
                 # --- 4. Salvar em JSON (para Artefato do Projeto) ---
                 if config['output_file']:
-                    # Certifica que o diretório 'dados/' existe
-                    os.makedirs(os.path.dirname(config['output_file']), exist_ok=True) 
+                   # ADICIONE ISTO: Cria a pasta 'outputs/' se não existir.
+                    os.makedirs('outputs/', exist_ok=True)
                     with open(config['output_file'], "w", encoding="utf-8") as f:
                         json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
                     print(f"\n✅ Resultado da extração salvo para Artefato: {config['output_file']}")
