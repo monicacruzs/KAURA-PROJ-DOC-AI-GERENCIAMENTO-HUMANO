@@ -62,7 +62,7 @@ jobs:
           mkdir -p dados
           
           # Determina o arquivo de entrada com base no modelo selecionado
-          case ${{ github.event.inputs.model_to_run }} in
+          case '${{ github.event.inputs.model_to_run }}' in
             "kaura-custom-viagem-v4")
               # Certifique-se que o seu PDF de teste de viagem está na raiz
               cp documento_viagem_teste.pdf dados/documento_viagem_teste.pdf
@@ -88,4 +88,4 @@ jobs:
         with:
           name: analysis-output-${{ github.event.inputs.model_to_run }}
           # Path é o local onde o seu analyze_doc_ai.py salva o output (dados/ ou outputs/)
-          path: dados/
+          path: outputs/
