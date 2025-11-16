@@ -27,7 +27,7 @@ SECRET_NAME = "document-intelligence-key"
 
 # Define as configurações de caminho e extração para cada modelo... (resto do código omitido)
 MODEL_CONFIG = {
-    # ... seu MODEL_CONFIG aqui
+   
     "prebuilt-layout": {
         "description": "Extração de Layout e Texto Puro.",
         "path": "dados/documento-teste.jpeg", 
@@ -44,7 +44,6 @@ MODEL_CONFIG = {
         },
         "output_file": "dados_fatura_extraidos.json"
     },
-    # --- NOVO MODELO CUSTOMIZADO DE VIAGEM ---
     "kaura-custom-viagem-v4": {
         "description": "Extração de Campos Customizados de Viagem (Neural v4).",
         "path": "dados/documento_viagem_teste.pdf", # Crie um novo PDF de teste nesta pasta
