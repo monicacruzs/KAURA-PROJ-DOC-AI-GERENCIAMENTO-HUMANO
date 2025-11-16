@@ -65,7 +65,7 @@ jobs:
           case ${{ github.event.inputs.model_to_run }} in
             "kaura-custom-viagem-v4")
               # Certifique-se que o seu PDF de teste de viagem está na raiz
-              cp KAURA_03.pdf dados/documento_viagem_teste.pdf
+              cp documento_viagem_teste.pdf dados/documento_viagem_teste.pdf
               ;;
             "prebuilt-invoice")
               # Certifique-se que o seu PDF de teste de fatura está na raiz
