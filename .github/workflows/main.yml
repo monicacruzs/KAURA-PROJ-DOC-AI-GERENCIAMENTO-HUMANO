@@ -79,9 +79,17 @@ jobs:
 
       - name: 🏃 Execute Document Analysis
         run: |
-          # CORREÇÃO: Passamos o contexto do GitHub DIRETAMENTE para o Python.
-          # Isso garante que a variável seja resolvida antes do Shell executar o comando.
-          python src/analyze_doc_ai.py --model-id "${{ github.event.inputs.model_to_run }}"
+          # Tenta obter o input, e se for nulo (vazio), usa 'kaura-custom-viagem-v4' como padrão.
+          MODEL_ID="${{ github.event.inputs.model_to_run }}"
+          
+          # Uso do Bash para checar se a variável está vazia (ocorre em push/PR)
+          if [ -z "$MODEL_ID" ]; then
+            MODEL_ID="kaura-custom-viagem-v4"
+            echo "Atenção: O input do modelo estava vazio. Usando o modelo padrão: $MODEL_ID"
+          fi
+          
+          # Executa o script com o valor (garantido) do MODEL_ID
+          python src/analyze_doc_ai.py --model-id "$MODEL_ID"
 
       - name: Upload Artifacts (Output JSON/TXT)
         uses: actions/upload-artifact@v4
