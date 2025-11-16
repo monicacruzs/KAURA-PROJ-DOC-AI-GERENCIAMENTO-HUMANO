@@ -79,9 +79,9 @@ jobs:
 
       - name: 🏃 Execute Document Analysis
         run: |
-          # Usa o parâmetro de entrada para executar o script
-          MODEL_ID=${{ github.event.inputs.model_to_run }}
-          python src/analyze_doc_ai.py --model-id "$MODEL_ID"
+          # CORREÇÃO: Passamos o contexto do GitHub DIRETAMENTE para o Python.
+          # Isso garante que a variável seja resolvida antes do Shell executar o comando.
+          python src/analyze_doc_ai.py --model-id "${{ github.event.inputs.model_to_run }}"
 
       - name: Upload Artifacts (Output JSON/TXT)
         uses: actions/upload-artifact@v4
