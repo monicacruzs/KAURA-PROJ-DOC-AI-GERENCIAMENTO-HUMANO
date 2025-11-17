@@ -91,12 +91,13 @@ O fato de o dado ter sido validado significa que pode ser usado, mas a regra de 
 * Para aprimoramento, pode-se treinar um **Modelo Personalizado** que se adapte especificamente ao layout desse fornecedor, aumentando a confiança para 90% ou mais em execuções futuras.
 ---
 ### ⚙️ Execução e Acesso ao Output (CI/CD)
-A arquitetura de processamento de documentos é Serverless/On-Demand via **GitHub Actions**.
 
-1.  **Gatilho:** O *workflow* é acionado por qualquer `git push` para a *branch* `main`.
-2.  **Jobs Paralelos:** Os projetos 1 e 2 são executados em *Jobs* separados no `main.yml` (`analyze-layout` e `analyze-invoice`).
-3.  **Output Persistido:** O resultado de ambos os *jobs* é salvo como **Artefatos** no GitHub.
-4.  **Acesso ao Artefato:** Na aba **`Actions`**, você pode baixar o **Artefato JSON** (Projeto 2) e o **Artefato TXT** (Projeto 1) na página de resumo de cada execução.
+A arquitetura de processamento de documentos é **Serverless/On-Demand** via GitHub Actions, utilizando o script unificado **`analyze_doc_ai.py`**.
+
+1.  **Gatilho:** O *workflow* é acionado **manualmente** (On-Demand) através da opção **`Workflow Dispatch`** na aba `Actions` do GitHub, onde o usuário seleciona o ID do modelo a ser executado (`kaura-custom-viagem-v4`, `prebuilt-invoice` ou `prebuilt-layout`).
+2.  **Job Único e Condicional:** O workflow utiliza um **único Job (`analyze_document`)** para toda a análise. O arquivo de entrada (PDF ou JPEG) é **condicionalmente preparado** no `main.yml` com base no modelo selecionado.
+3.  **Output Persistido:** O resultado da análise é salvo como um **Artefato** no GitHub. O nome do Artefato é **dinâmico**, baseado no modelo executado (ex: `analysis-output-kaura-custom-viagem-v4`).
+4.  **Acesso ao Artefato:** Na aba **`Actions`**, você pode baixar o Artefato (JSON ou TXT) na página de resumo da execução que acabou de ser concluída.
 
 ---
 ## 📦 Resultados da Automação (Artefatos de Saída)
