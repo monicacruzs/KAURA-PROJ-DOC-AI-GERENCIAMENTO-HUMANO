@@ -6,7 +6,7 @@
 
 ## ✨ Assistente de Gerenciamento de Documentos Centrado no Ser Humano (Doc Intelligence no Azure)
 
-> 🧠 **Headline:** **Migração Estratégica para Azure: Pipeline de Processamento de Documentos, Foco em Automação e Redução da Carga Burocrática.**
+> 🧠 **Headline:** **Migração Estratégica para Azure: Pipeline IDP e OIDC Concluído: Solução Serverless de Document Intelligence Pronta para Exposição como API REST**
 
 Este projeto demonstra a construção de uma solução de **Processamento Inteligente de Documentos (IDP)**, migrando conceitos de OCR avançado para a plataforma Azure. O foco metodológico é o **Impacto Humano (KAURA)**: usar a IA para eliminar tarefas tediosas e liberar o tempo do colaborador para o **julgamento humano e a empatia**.
 
@@ -20,7 +20,7 @@ O problema humano é claro: digitar dados de faturas ou contratos é tedioso e p
 ### 🛡️ Evolução Arquitetural: Migração para OIDC e Key Vault (Melhores Práticas)
 
 <p align="center">
-    <img width="500" src="https://github.com/monicacruzs/KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO/blob/main/assets/Diagrama1.png" alt="Diagrama Arquitetural"> 
+    <img width="500" src="https://github.com/monicacruzs/KAURA-PROJ-DOC-AI-GERENCIAMENTO-HUMANO/blob/main/assets/Diagrama2.png" alt="Diagrama Arquitetural"> 
 </p>
 
 A configuração do pipeline CI/CD exigiu uma migração estratégica para as melhores práticas de segurança do Azure/GitHub.
@@ -43,10 +43,7 @@ Todos os projetos utilizam o script principal **`analyze_doc_ai.py`** e são exe
 ### ➡️ Projeto 1: Extração de Layout (OCR/Texto Puro)
 Focado na extração bruta de texto (OCR) e informações de layout. Este projeto gera um Artefato de saída TXT e é ideal para documentos não estruturados como listas ou notas simples.
 
-### ➡️ Projeto 2: Extração de Campos Chave-Valor
-Focado na extração de pares chave-valor para dados semi-estruturados, como notas fiscais ou recibos, usando modelos pré-construídos que mapeiam dados específicos.
-
-### ➡️ Projeto 3: Extração Estruturada e Validação Humana (JSON)
+### ➡️ Projeto 2: Extração Estruturada, Confiança e Validação Humana (JSON)
 
 Este projeto demonstra a extração de campos estruturados usando o modelo `prebuilt-invoice` (fatura), com foco na **validação da confiança** e na regra de negócio.
 
@@ -57,6 +54,9 @@ Este projeto demonstra a extração de campos estruturados usando o modelo `preb
 | `InvoiceId` | `003589851` | 94% | Confiança alta, o ID da fatura foi bem reconhecido. |
 | `InvoiceTotal` | `219.99` | 94% | Confiança alta, valor monetário bem reconhecido. |
 | `CustomerName` | `Monica da Cruz Silva` | 53% | Confiança moderada. O modelo identificou o nome, mas a baixa confiança pode exigir uma revisão manual deste campo. Essa é uma informação valiosa, pois no Processamento Inteligente de Documentos (IDP) a **validação humana** é crucial..|
+
+### ➡️ Projeto 3: Extração Estruturada e Validação Humana (JSON)
+
 
 ### ➡️ Projeto 4: Modelo Customizado de Viagem (Extração Estruturada)
 
