@@ -387,7 +387,7 @@ if __name__ == "__main__":
 
 # FIM DO CÓDIGO PYTHON
 ```
-#### 2.3.2. Arquivo de Workflow (.github/workflows/main.yml)
+#### 2.3.2. Arquivo de Workflow (.github/workflows/main.yml) - Para o Projeto 2
 
 Este arquivo define o pipeline que o GitHub Actions executará a cada `git push`, executando os dois projetos de forma **independente** para isolamento de testes e geração de dois Artefatos.
 
@@ -500,13 +500,23 @@ Em Resumo:
 | **Repositório** | Criado previamente no GitHub Web | Subentendido pelo `git clone` e `git push`. |
 
 ---
-## 4. ⚙️ Projeto KAURA-DOC-AI-CUSTOM (Modelo Customizado)
+## ⚙️ Projeto 4: KAURA-DOC-AI-CUSTOM (Modelo Customizado)
 
 Este projeto foca no treinamento de um modelo customizado para extrair dados de documentos não-padrão específicos do negócio (ex: formulário X, contrato Y).
 
-### 4.1. 💾 Configuração do Azure Storage para Treinamento
+### 4.1. 💾 Configuração do Azure Storage para Treinamento ( Provisionamento de Infraestrutura (FinOps e MLOps))
 
-O modelo customizado requer dados de treinamento armazenados em um contêiner específico no Azure Blob Storage.
+📝 Pré-requisito
+Assuma que o Resource Group (RG-KAURA-DOC-AI) e o recurso de Document Intelligence (kaura-doc-ai-service-05) já estão criados.
+
+**Passo 1:** Ativação da Identidade Gerenciada (Passo OBRIGATÓRIO)
+A identidade gerenciada deve ser ativada antes de configurar o RBAC.
+
+1. Navegue para o seu recurso de Document Intelligence: kaura-doc-ai-service-05.
+2. No menu lateral, clique em Identity.
+3. Na aba System assigned, mude o status para On (Ligado) e clique em Save.
+
+**Passo 2:** Criação da Conta de Storage e Contêiner (FinOps). O modelo customizado requer dados de treinamento armazenados em um contêiner específico no Azure Blob Storage.
 
 | Recurso | Tipo | Descrição |
 | :--- | :--- | :--- |
@@ -514,21 +524,21 @@ O modelo customizado requer dados de treinamento armazenados em um contêiner es
 | **Contêiner** | `kaura-training-data` | Contêiner dedicado para armazenar os documentos de treinamento rotulados. |
 | **Conteúdo** | `*.pdf`, `*.jpg`, `*.png` + arquivos `.json` de rótulo | Mínimo de **5 documentos** rotulados por tipo de documento customizado. |
 
-### 4.2. 🤖 Processo de Treinamento no Document Intelligence Studio
+*Nota:* Devido ao erro persistente SubscriptionNotFound no Azure CLI, este passo será executado via Portal Azure.
 
-O treinamento é realizado manualmente no Azure AI Document Intelligence Studio.
+**Crie a Conta de Storage kauradocaitrg002 no Portal Azure.**
 
-1.  **Acessar o Studio:** Navegar para o [Azure AI Document Intelligence Studio](https://formrecognizer.appliedai.azure.com/studio).
-2.  **Criar Projeto:**
-    * Selecionar **Modelos customizados** > **Criar um projeto**.
-    * Ligar o projeto ao Recurso do Document Intelligence e ao Contêiner (`kaura-training-data`).
-3.  **Rotulagem:** Fazer ou revisar a rotulagem dos campos no conjunto de documentos.
-4.  **Treinamento:** Clicar em **Treinar**.
-    * **Definir `Model ID` (Crucial):** O ID deve seguir o padrão `kaura-custom-seunome-vN` (ex: `kaura-custom-contrato-v1`).
-    * **Modo de Treinamento:** Usar **Template** (para <10 docs e consistentes) ou **Neural** (para >10 docs e variados).
-    * **Saída:** O `Model ID` treinado deve ser registrado no **Key Vault** como segredo para uso pelo pipeline de CI/CD.
+- Project details: Use o Resource Group RG-KAURA-DOC-AI.
 
-### 4.3. 🔐 Regras de Permissão de Acesso (RBAC)
+Instance details:
+
+- Storage account name: kauradocaitrg002.
+- Region: South America - Brazil South.
+- Redundancy (FinOps): Configure a Redundancy como Locally-redundant storage (LRS).
+- Após a criação, navegue até a Conta de Storage kauradocaitrg002 e vá para Containers.
+- Crie o contêiner de treinamento: kaura-training-data (Nível de acesso Private).
+
+### 4.2. 🔐 Regras de Permissão de Acesso (RBAC)
 
 Para que o Recurso do Document Intelligence possa **ler** os documentos do Storage para o treinamento, é necessária uma atribuição de função (Role-Based Access Control - RBAC).
 
@@ -546,69 +556,44 @@ Para que o Recurso do Document Intelligence possa **ler** os documentos do Stora
 
 **Nota FinOps (Custo Zero):** A permissão é temporária para o treinamento, mas a Identidade Gerenciada é a forma mais segura e recomendada de acesso.
 
-🏗️ SETUP.md: Provisionamento de Infraestrutura (FinOps e MLOps)
-Este guia detalha os passos para provisionar a infraestrutura e configurar as permissões, garantindo o mínimo custo (FinOps) e a rastreabilidade (MLOps).
+**Passo 3:** Atribuição de Permissões RBAC (IAM)
 
-📝 Pré-requisito
-Assuma que o Resource Group (RG-KAURA-DOC-AI) e o recurso de Document Intelligence (kaura-doc-ai-service-05) já estão criados.
-
-Passo 1: Ativação da Identidade Gerenciada (Passo OBRIGATÓRIO)
-A identidade gerenciada deve ser ativada antes de configurar o RBAC.
-
-Navegue para o seu recurso de Document Intelligence: kaura-doc-ai-service-05.
-
-No menu lateral, clique em Identity.
-
-Na aba System assigned, mude o status para On (Ligado) e clique em Save.
-
-Passo 2: Criação da Conta de Storage e Contêiner (FinOps)
-Devido ao erro persistente SubscriptionNotFound no Azure CLI, este passo será executado via Portal Azure.
-
-Crie a Conta de Storage kauradocaitrg002 no Portal Azure.
-
-Project details: Use o Resource Group RG-KAURA-DOC-AI.
-
-Instance details:
-
-Storage account name: kauradocaitrg002.
-
-Region: South America - Brazil South.
-
-Redundancy (FinOps): Configure a Redundancy como Locally-redundant storage (LRS).
-
-Após a criação, navegue até a Conta de Storage kauradocaitrg002 e vá para Containers.
-
-Crie o contêiner de treinamento: kaura-training-data (Nível de acesso Private).
-
-Passo 3: Atribuição de Permissões RBAC (IAM)
 Este passo concede permissão de leitura ao Document Intelligence para acessar os documentos.
 
-Navegue para a Conta de Storage kauradocaitrg002.
+1. Navegue para a Conta de Storage kauradocaitrg002.
+2. Vá para Access control (IAM) e clique em + Add role assignment.
+3. Role (Função): Selecione Storage Blob Data Reader.
+4. Member (Membro):
+5. Selecione Managed identity.
+6. Pesquise e selecione o recurso kaura-doc-ai-service-05 (Document Intelligence).
+7. Finalize a atribuição em Review + assign.
 
-Vá para Access control (IAM) e clique em + Add role assignment.
 
-Role (Função): Selecione Storage Blob Data Reader.
+### 4.3. 🤖 Processo de Treinamento no Document Intelligence Studio
 
-Member (Membro):
+O treinamento é realizado manualmente no Azure AI Document Intelligence Studio.
 
-Selecione Managed identity.
+1.  **Acessar o Studio:** Navegar para o [Azure AI Document Intelligence Studio](https://formrecognizer.appliedai.azure.com/studio).
+2.  **Criar Projeto:**
+    * Selecionar **Modelos customizados** > **Criar um projeto**.
+    * Ligar o projeto ao Recurso do Document Intelligence e ao Contêiner (`kaura-training-data`).
+3.  **Rotulagem:** Fazer ou revisar a rotulagem dos campos no conjunto de documentos.
+4.  **Treinamento:** Clicar em **Treinar**.
+    * **Definir `Model ID` (Crucial):** O ID deve seguir o padrão `kaura-custom-seunome-vN` (ex: `kaura-custom-contrato-v1`).
+    * **Modo de Treinamento:** Usar **Template** (para <10 docs e consistentes) ou **Neural** (para >10 docs e variados).
+    * **Saída:** O `Model ID` treinado deve ser registrado no **Key Vault** como segredo para uso pelo pipeline de CI/CD.
 
-Pesquise e selecione o recurso kaura-doc-ai-service-05 (Document Intelligence).
+**💾 Passo 4:** Upload dos Dados de Treinamento
 
-Finalize a atribuição em Review + assign.
-
-💾 Passo 4: Upload dos Dados de Treinamento
 Com a infraestrutura pronta, carregue os 9 documentos PDF para o contêiner.
 
-Navegue para a Conta de Storage kauradocaitrg002 > Containers.
-
-Clique no contêiner kaura-training-data.
-
-Utilize o botão Upload para carregar os seus 9 documentos PDF (incluindo o documento de teste de robustez com a simulação de mancha de café).
+1. Navegue para a Conta de Storage kauradocaitrg002 > Containers.
+2. Clique no contêiner kaura-training-data.
+3. Utilize o botão Upload para carregar os seus 9 documentos PDF (incluindo o documento de teste de robustez com a simulação de mancha de café).
 
 A infraestrutura está completa.
 
-## Após o Treino e Teste no Document Intelligence Studio vamos integrar a chamada para uma API
+### 4.4. Após o Treino e Teste no Document Intelligence Studio vamos integrar a chamada para uma API
 
 A adaptação é mínima. O principal a ser feito é:
 
@@ -617,13 +602,12 @@ A adaptação é mínima. O principal a ser feito é:
 3. Configurar o GitHub Actions
 
 ---
-
 ## Código Python Adaptado (`analyze_doc_ai.py`)
 
-Abaixo está o código atualizado. Substitua todo o seu dicionário `MODEL_CONFIG` e a lógica de extração de campos dentro da função `analyze_document`.
+Abaixo está o código atualizado. 
 
-### 1. Modificação do `MODEL_CONFIG`
-Adicione a configuração do seu modelo personalizado `kaura-custom-viagem-v4` ao dicionário `MODEL_CONFIG`, juntamente com os 6 campos que você treinou:
+#### 4.4.1. Modificação do `MODEL_CONFIG`
+Substitua todo o seu dicionário `MODEL_CONFIG` e a lógica de extração de campos dentro da função `analyze_document`.
 
 Python
 ```Python
@@ -667,7 +651,7 @@ MODEL_CONFIG = {
 
 **Ação:** Lembre-se de colocar um documento de teste de viagem (por exemplo, o `KAURA_03.pdf`) na sua pasta `dados/` e renomeá-lo para `documento_viagem_teste.pdf` ou ajustar o campo `path`no `MODEL_CONFIG`.
 
-### 2. Modificação da Lógica de Extração
+#### 4.4.2 Modificação da Lógica de Extração
 Substitua o trecho `... (Lógica de loop e extração dos campos Try ... Except) ...` dentro da função `analyze_document` 
 
 Python
@@ -807,7 +791,114 @@ az role assignment create --role "Reader" --assignee <CLIENT_ID_DO_SERVICE_PRINC
 az keyvault set-policy --name kvkauradocaisecprod002 --secret-permissions get --spn <CLIENT_ID_DO_SERVICE_PRINCIPAL>
 ```
 
-## 3. FASE 3: DESPROVISIONAMENTO E ESTRATÉGIA FINOPS (CUSTO ZERO ESTRUTURAL)
+## 4. Arquivo de Workflow (.github/workflows/main.yml) - (Projeto 4)
+
+Atualizando o código do .yml para o Projeto 4. Estou saindo de dois Jobs paralelos e criando um Job para os .Json e mantendo o Job para .txt, buscando unificar o código.
+
+Yml
+```YML
+name: CI/CD do Document Intelligence
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      model_to_run:
+        description: 'Selecione o ID do modelo a ser executado'
+        required: true
+        default: 'kaura-custom-viagem-v4'
+        type: choice
+        options:
+          - kaura-custom-viagem-v4
+          - prebuilt-invoice
+          - prebuilt-layout
+          
+# OIDC: Permissão NECESSÁRIA para o Action solicitar o token JWT do GitHub
+permissions:
+  id-token: write 
+  contents: read
+
+jobs:
+  analyze_document:
+    runs-on: ubuntu-latest
+    environment: dev
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' 
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: 🔑 Azure Login (via AZURE_CREDENTIALS Secret)
+        # Recomendo usar o AZURE_CREDENTIALS que você gerou, trocando este passo de OIDC
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # --- DEFINIÇÃO DO ENDPOINT E KEY VAULT URI (Variáveis de ambiente) ---
+      - name: Set Environment Variables
+        run: |
+          # ENDPOINT (Via Secret)
+          echo "AZURE_FORM_RECOGNIZER_ENDPOINT=${{ secrets.AZURE_FORM_RECOGNIZER_ENDPOINT }}" >> $GITHUB_ENV
+          # URI do Key Vault (Via Secret) - Agora incluído
+          echo "AZURE_KEY_VAULT_URI=${{ secrets.AZURE_KEY_VAULT_URI }}" >> $GITHUB_ENV
+
+      # --- CRÍTICO: PREPARAÇÃO DE DADOS CONDICIONAL ---
+      - name: 📂 Prepare Input Data
+        run: |
+          # Cria a pasta de dados que o analyze_doc_ai.py espera
+          mkdir -p dados
+          
+          # Determina o arquivo de entrada com base no modelo selecionado
+          case '${{ github.event.inputs.model_to_run }}' in
+            "kaura-custom-viagem-v4")
+              # Certifique-se que o seu PDF de teste de viagem está na raiz
+              cp documento_viagem_teste.pdf dados/documento_viagem_teste.pdf
+              ;;
+            "prebuilt-invoice")
+              # Certifique-se que o seu PDF de teste de fatura está na raiz
+              cp fatura-teste.pdf dados/fatura-teste.pdf
+              ;;
+            "prebuilt-layout")
+              # Certifique-se que o seu JPEG/PDF de teste de layout está na raiz
+              cp documento-teste.jpeg dados/documento-teste.jpeg
+              ;;
+          esac
+
+      - name: 🏃 Execute Document Analysis
+        run: |
+          # Tenta obter o input, e se for nulo (vazio), usa 'kaura-custom-viagem-v4' como padrão.
+          MODEL_ID="${{ github.event.inputs.model_to_run }}"
+          
+          # Uso do Bash para checar se a variável está vazia (ocorre em push/PR)
+          if [ -z "$MODEL_ID" ]; then
+            MODEL_ID="kaura-custom-viagem-v4"
+            echo "Atenção: O input do modelo estava vazio. Usando o modelo padrão: $MODEL_ID"
+          fi
+          
+          # Executa o script com o valor (garantido) do MODEL_ID
+          python src/analyze_doc_ai.py --model-id "$MODEL_ID"
+
+      - name: Upload Artifacts (Output JSON/TXT)
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-output-${{ github.event.inputs.model_to_run }}
+          # Path é o local onde o seu analyze_doc_ai.py salva o output (dados/ ou outputs/)
+          path: outputs/
+```
+
+# FASE 3: DESPROVISIONAMENTO E ESTRATÉGIA FINOPS (CUSTO ZERO ESTRUTURAL)
 
 Esta é a estratégia de **FinOps** que garante o custo zero para o projeto. Ela elimina os únicos recursos que geram cobrança persistente (VM, Disco de S.O. e IP Público Standard), mantendo o serviço de **Document Intelligence F0 (GRÁTIS)** para futuros testes.
 
