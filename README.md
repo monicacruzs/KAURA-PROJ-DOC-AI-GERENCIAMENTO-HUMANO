@@ -55,6 +55,21 @@ No ambiente do Azure Functions, não usamos o OIDC (GitHub Actions), mas sim a I
 |AZURE_TENANT_ID|Necessário para configurar o OIDC.|Desnecessário no código Python, pois a Identidade Gerenciada é configurada no Azure.|REMOVIDO do código, mas usado no plano de fundo."
 |AZURE_CREDENTIALS|Método antigo (JSON do Service Principal).|A ser evitado. Substituído pela Identidade Gerenciada (MSI).|IGNORADO
 
+🔑 A Camada de Segurança Serverless (Identidade Gerenciada)
+
+O código Python no Azure Function continua usando o `DefaultAzureCredential()`:
+
+1. O que o CI/CD (OIDC) fazia: O `DefaultAzureCredential` detectava o token temporário do OIDC do GitHub Actions.
+
+2. O que o Azure Function (MSI) fará: O `DefaultAzureCredential` detecta automaticamente a Identidade Gerenciada (Managed Identity) da Function App.
+
+Você só precisa garantir que:
+
+1. A Function App tenha uma Identidade Gerenciada ativada.
+
+2. Esta Identidade Gerenciada tenha a permissão de "Key Vault Secret User" (ou equivalente) no seu Key Vault.
+
+Com isso, o fluxo de segurança é mais limpo e mais seguro do que no CI/CD, e o Key Vault continua sendo a fonte da chave.
 ---
 
 ## 🚀 Projetos Atuais (Modelos Unificados e CI/CD)
@@ -202,11 +217,12 @@ Este repositório segue o **Padrão KAURA Unificado** para clareza e auditoria:
 | **`prompts/`**:| O Prompt Mestre usado para planejamento e arquitetura.|
 | **`src/`**:| O script Python de integração com o Azure Document Intelligence (`analyze_doc_ai.py`).|
 | **`.gitignore`**:| **CRUCIAL** para segurança. Garante que as chaves (Keys) e variáveis de ambiente nunca sejam enviadas ao GitHub.|
-| **`SETUP.md`**:| O guia completo de provisionamento e **FinOps** (estratégia de custo).
-| **`README.md`**:|         |
+| **`SETUP.md`**:| O guia completo de provisionamento e **FinOps** (estratégia de custo) (O How-To).
+| **`README.md`**:| É a apresentação de portfólio de alto nível (O What e Why). Resume os desafios técnicos superados e a proposta de valor do projeto.       |
 | **`requirements.txt`**:| Lista de dependências Python para o GitHub Actions. Inclui azure-keyvault-secrets e azure-identity.|
 |**`MODEL_CONFIG`**:|Dicionário de configuração. Define os caminhos de entrada e saída para cada modelo.|
 |**`analyze_doc_ai.py`**:|Script Principal. Contém a lógica unificada de extração (JSON para estruturados, TXT para Layout).|
+|**`PROVISIONAMENTO_AZURE_CI_CD`**:|É o guia técnico de "como fazer" (O How-To). Destina-se a engenheiros que precisam replicar o ambiente. Ele deve permanecer separado, detalhado e focado em comandos Azure CLI, IDs e configuração OIDC.
 
 ---
 
