@@ -669,52 +669,72 @@ MODEL_CONFIG = {
 **Ação:** Lembre-se de colocar um documento de teste de viagem (por exemplo, o `KAURA_03.pdf`) na sua pasta `dados/` e renomeá-lo para `documento_viagem_teste.pdf` ou ajustar o campo `path`no `MODEL_CONFIG`.
 
 ### 2. Modificação da Lógica de Extração
-Substitua o trecho `... (Lógica de loop e extração dos campos) ...` dentro da função `analyze_document` pela lógica abaixo para extrair corretamente os 6 campos e salvar no JSON:
+Substitua o trecho `... (Lógica de loop e extração dos campos Try ... Except) ...` dentro da função `analyze_document` 
 
 Python
 ```Python
-# ... (dentro da função analyze_document) ...
-        
+ try:
+    # 2. Executa a análise (Abre o arquivo e inicia o poller)
+        with open(document_path, "rb") as f:
+            poller = document_analysis_client.begin_analyze_document(
+                model_id, document=f.read()
+            )
+            result = poller.result() # Esta linha pode gerar exceções de rede/API
+            
+        print(f"\n--- Resultado da Análise ({config['description']}) ---")
+
         # ------------------------------------------------------------------
-        # 3. Lógica de Extração e Output (Modelos Estruturados: Faturas OU Customizados)
+        # 3. Lógica de Extração e Output (UNIFICADA)
         # ------------------------------------------------------------------
+
+        # Se for um modelo que extrai campos estruturados (Viagem ou Fatura)
         if config['extract_fields']:
             dados_extraidos = {}
             
             if result.documents:
                 doc = result.documents[0]
                 
-                # --- Lógica de loop e extração dos campos (A SER INSERIDA) ---
+                # --- Lógica de loop e extração dos campos ---
                 print("Extraindo os campos do documento...")
                 
+                # Itera sobre os campos definidos no MODEL_CONFIG
                 for field_name, friendly_name in config['extract_fields'].items():
                     field = doc.fields.get(field_name)
                     
+                    valor = None
+                    confianca = 0.0
+                    
                     if field:
-                        # Extrai o valor do campo e sua confiança
-                        value = field.value
-                        confidence = field.confidence
+                        valor = field.value
+                        confianca = field.confidence if field.confidence is not None else 0.0
                         
-                        # Converte para string para salvar no JSON, se necessário
-                        if hasattr(value, 'isoformat'): # Trata datas/tempos
-                            value = value.isoformat()
+                        # Trata objetos de valor (como datas, números ou objetos complexos)
+                        if hasattr(valor, 'isoformat'): # Trata datas/tempos
+                            valor = valor.isoformat()
+                        elif hasattr(valor, 'text') and valor.text is not None:
+                             valor = valor.text
+                        elif isinstance(valor, dict): # Trata casos em que o valor é um dicionário
+                             # Geralmente usamos apenas o texto extraído para simplificar
+                            valor = field.value.text
                             
+                        
+                        # Adiciona ao dicionário de saída (dentro do IF)
                         dados_extraidos[field_name] = {
-                            "valor": value,
-                            "confianca": f"{confidence:.2f}"
+                            "valor": valor,
+                            "confianca": round(confianca, 2)
                         }
                         
                         # Imprime no console para debug
-                        print(f"  {friendly_name}: {value} (Confiança: {confidence:.2f})")
-                        
-                    else:
+                        print(f"  {friendly_name}: {valor} (Confiança: {round(confianca, 2)})")
+                            
+                    else: # Este else está AGORA na indentação correta, correspondendo ao 'if field:'
                         print(f"  {friendly_name}: (Não encontrado)")
-                        dados_extraidos[field_name] = {"valor": None, "confianca": "0.00"}
+                        dados_extraidos[field_name] = {"valor": None, "confianca": "0.00"} # Adiciona ao dicionário mesmo que não encontrado
 
-                # --- 4. Salvar em JSON (para Artefato do Projeto) ---
+                # --- 4. Salvar em JSON (para Artefato) ---
                 if config['output_file']:
-                    # Certifica que o diretório 'dados/' existe
-                    os.makedirs(os.path.dirname(config['output_file']), exist_ok=True) 
+                    # Cria a pasta 'outputs/' se não existir (garantindo que o salvamento funcione)
+                    os.makedirs('outputs/', exist_ok=True)
                     with open(config['output_file'], "w", encoding="utf-8") as f:
                         json.dump(dados_extraidos, f, indent=4, ensure_ascii=False)
                     print(f"\n✅ Resultado da extração salvo para Artefato: {config['output_file']}")
@@ -722,11 +742,31 @@ Python
             else:
                 print(f"Nenhum documento do tipo '{model_id}' detectado no arquivo.")
                 
-        # ------------------------------------------------------------------
-        # 3. Lógica de Extração e Output (Modelos de Layout: Projeto 1 - Layout/OCR)
-        # ------------------------------------------------------------------
-        else: # Entra aqui se config['extract_fields'] é False
-            # ... (seu código de extração de layout continua aqui) ...
+        # Se for um modelo de Layout/OCR (TXT)
+        else: # Este else está no mesmo nível do 'if config['extract_fields']:' inicial
+            output_text = ""
+            
+            # --- Lógica de loop e extração de texto (Layout) ---
+            if result.pages:
+                for page in result.pages:
+                    if page.lines:
+                        # Extrai o texto de cada linha e adiciona quebra de linha
+                        output_text += "\n".join([line.content for line in page.lines]) + "\n"
+            
+            print("Conteúdo de texto extraído com sucesso.")
+
+            # --- 4. Salvar em TXT (para Artefato) ---
+            if config['output_file']:
+                os.makedirs('outputs/', exist_ok=True)
+                with open(config['output_file'], "w", encoding="utf-8") as f:
+                    f.write(output_text)  
+                print(f"\n✅ Resultado do layout salvo para Artefato: {config['output_file']}")
+                
+        print("---------------------------------------")
+       
+    except Exception as e:
+        print(f"\nERRO DURANTE A ANÁLISE DO DOCUMENTO: {e}")
+
 # ... (fim da função analyze_document) ...
 
 ```
