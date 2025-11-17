@@ -38,7 +38,7 @@ A configuração do pipeline CI/CD exigiu uma migração estratégica para as me
 
 ## 🚀 Projetos Atuais (Modelos Unificados e CI/CD)
 
-Todos os projetos utilizam o script principal **`analyze_doc_ai.py`** e são executados de forma independente via GitHub Actions, gerando Artefatos de saída (TXT e JSON).
+Todos os projetos utilizam o script principal **`analyze_doc_ai.py`** e são executados de forma independente **via GitHub Actions**, gerando Artefatos de saída (TXT e JSON).
 
 ### ➡️ Projeto 1: Extração de Layout (OCR/Texto Puro)
 Focado na extração bruta de texto (OCR) e informações de layout. Este projeto gera um Artefato de saída TXT e é ideal para documentos não estruturados como listas ou notas simples.
@@ -55,7 +55,25 @@ Este projeto demonstra a extração de campos estruturados usando o modelo `preb
 | `InvoiceTotal` | `219.99` | 94% | Confiança alta, valor monetário bem reconhecido. |
 | `CustomerName` | `Monica da Cruz Silva` | 53% | Confiança moderada. O modelo identificou o nome, mas a baixa confiança pode exigir uma revisão manual deste campo. Essa é uma informação valiosa, pois no Processamento Inteligente de Documentos (IDP) a **validação humana** é crucial..|
 
-### ➡️ Projeto 3: Extração Estruturada e Validação Humana (JSON)
+### ➡️ Projeto 3: CI/CD, Segurança OIDC e Análise de Confiança (Capstone)
+Este projeto demonstra o nível mais alto de maturidade arquitetural e analítica, unindo o Processamento Inteligente de Documentos (IDP) com a Segurança na Nuvem.
+
+1. Segurança e Automação de Pipeline
+
+|Desafio Superado|Solução de Engenharia|Por que é importante?|
+| :--- | :--- | :--- |
+Segredos de Longa Duração|Implementação de OpenID Connect (OIDC)|Elimina senhas estáticas no GitHub, usando tokens temporários e verificados.|
+Exposição de Chaves de API|Uso de Azure Key Vault|A chave de acesso do Document Intelligence é lida no Azure, nunca exposta no repositório GitHub.|
+Execução e Entrega|Pipeline CI/CD (GitHub Actions)|Garante que o processo seja repetível e automatizado para produção (DevOps).|
+
+2. Análise Estruturada e Julgamento Humano
+O projeto utiliza o modelo prebuilt-invoice (fatura), com foco na validação da confiança e na regra de negócio.
+
+|Campo|Valor Extraído|,Confiança|Ação de Negócio
+| :--- | :--- | :--- | :--- |
+|InvoiceId|003589851,94%|"Aprovado: Confiança alta| processamento automático.|
+|InvoiceTotal|219.99,94%|"Aprovado: Confiança alta| processamento automático.|
+CustomerName|Monica da Cruz Silva|53%|Sinalizado para Revisão Humana: Confiança moderada. O julgamento humano é necessário antes da integração.|
 
 
 ### ➡️ Projeto 4: Modelo Customizado de Viagem (Extração Estruturada)
