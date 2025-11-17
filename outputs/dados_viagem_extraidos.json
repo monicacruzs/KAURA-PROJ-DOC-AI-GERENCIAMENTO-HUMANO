@@ -1,0 +1,26 @@
+{
+    "Nome_do_Colaborador": {
+        "valor": "\"Tatiane 9\"",
+        "confianca": 0.42
+    },
+    "Centro_de_Custo": {
+        "valor": null,
+        "confianca": 0.76
+    },
+    "Data_de_Inicio_da_Viagem": {
+        "valor": "2028-01-03",
+        "confianca": 0.82
+    },
+    "Data_de_Fim_da_Viagem": {
+        "valor": null,
+        "confianca": 0.56
+    },
+    "Valor_Total_Aprovado": {
+        "valor": 2990.0,
+        "confianca": 0.58
+    },
+    "Status_de_Aprovacao": {
+        "valor": "Aprovado",
+        "confianca": 0.85
+    }
+}
