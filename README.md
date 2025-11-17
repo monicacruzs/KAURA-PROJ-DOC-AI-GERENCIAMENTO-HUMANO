@@ -34,6 +34,27 @@ A configuração do pipeline CI/CD exigiu uma migração estratégica para as me
 * O pipeline (`main.yml`) precisou adicionar a etapa de **Autenticação OIDC** (`azure/login@v1`) para que o Service Principal (SP) pudesse fazer o login.
 * O script Python foi ajustado para acessar o **Key Vault** para obter a chave, em vez de ler uma variável de ambiente direta do GitHub.
 * O Azure exigiu a criação de **Políticas de Acesso** no Key Vault para permitir que o SP realizasse a operação `Get` (Obter Segredo).
+
+**Com o Projeto 4 fizemos uma alteração na segurança em ambientes Serverless**
+
+Mudamos de forma sutil, mas crucial!
+
+O Key Vault não foi ignorado. Pelo contrário, ele continua sendo a pedra angular da segurança da API.
+
+O que muda é a forma como o código Python prova sua identidade para o Key Vault.
+
+🛡️ O Mapeamento da Segurança no Azure Functions
+
+No ambiente do Azure Functions, não usamos o OIDC (GitHub Actions), mas sim a Identidade Gerenciada (Managed Identity). Esta é a melhor prática de segurança para o Serverless no Azure.
+
+|Variável/Conceito|Uso no CI/CD (OIDC)|Uso no Azure Functions (Serverless)|Status
+| :--- | :--- | :--- |:--- |
+|AZURE_KEY_VAULT_URI|Necessário.| Define onde buscar o segredo.|Necessário. Configurado como Application Setting na Function App.|MANTIDO
+|document-intelligence-key|Necessário. |O segredo buscado.|Necessário. O mesmo segredo buscado.,MANTIDO
+|AZURE_FORM_RECOGNIZER_ENDPOINT|Necessário. |O endpoint do serviço DI.|Necessário. Configurado como Application Setting.|MANTIDO
+|AZURE_TENANT_ID|Necessário para configurar o OIDC.|Desnecessário no código Python, pois a Identidade Gerenciada é configurada no Azure.|REMOVIDO do código, mas usado no plano de fundo."
+|AZURE_CREDENTIALS|Método antigo (JSON do Service Principal).|A ser evitado. Substituído pela Identidade Gerenciada (MSI).|IGNORADO
+
 ---
 
 ## 🚀 Projetos Atuais (Modelos Unificados e CI/CD)
