@@ -108,13 +108,13 @@ Abaixo estão os outputs dos modelos, persistidos na pasta `outputs/` do reposit
 | :--- | :--- | :--- | :--- |
 | **`dados_fatura_extraidos.json`** | Projeto 2/3 | `prebuilt-invoice` | Extração estruturada de campos-chave (Total, ID, Cliente) em formato JSON. (`faura_teste.pdf`)|
 | **`dados_layout_extraidos.txt`** | Projeto 1 | `prebuilt-layout` | Extração de texto puro e completo do documento (`documento-teste.jpeg`). |
-| **`dados_viagem_extraidos.json`**| Projeto 4 | kaura-custom-viagem-v4 |Extração de campos customizados do Formulário de Viagem KAURA em formato JSON.(`documento_viagem_teste.pdf`)|
+| **`dados_viagem_extraidos.json`**| Projeto 4 | `kaura-custom-viagem-v4` |Extração de campos customizados do Formulário de Viagem KAURA em formato JSON.(`documento_viagem_teste.pdf`)|
 
 ➡️ **Ver Resultado JSON:** [Clique aqui para ver o dados_fatura_extraidos.json](outputs/dados_fatura_extraidos.json)
 
 ➡️ **Ver Resultado TXT:** [Clique aqui para ver o dados_layout_extraidos.txt](outputs/dados_layout_extraidos.txt)
 
-➡️ **Ver Resultado JSON:** [Clique aqui para ver o dados_dados_viagem_extraidos.json](outputs/dados_viagem_extraidos.json)
+➡️ **Ver Resultado JSON:** [Clique aqui para ver o dados_viagem_extraidos.json](outputs/dados_viagem_extraidos.json)
 
 ---
 
