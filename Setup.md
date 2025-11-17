@@ -627,15 +627,15 @@ Adicione a configuração do seu modelo personalizado `kaura-custom-viagem-v4` a
 
 Python
 ```Python
-# ... (código anterior) ...
-
-# Define as configurações de caminho e extração para cada modelo
+# .... (Inicio do Codigo) ...
+# Define as configurações de caminho e extração para cada modelo... (resto do código omitido)
 MODEL_CONFIG = {
+   
     "prebuilt-layout": {
         "description": "Extração de Layout e Texto Puro.",
         "path": "dados/documento-teste.jpeg", 
         "extract_fields": False,
-        "output_file": "dados_layout_extraidos.txt" 
+        "output_file": "outputs/dados_layout_extraidos.txt" 
     },
     "prebuilt-invoice": {
         "description": "Extração de Campos de Fatura.",
@@ -645,9 +645,8 @@ MODEL_CONFIG = {
             "CustomerName": "Nome do Cliente",
             "InvoiceTotal": "Total da Fatura"
         },
-        "output_file": "dados_fatura_extraidos.json"
+        "output_file": "outputs/dados_fatura_extraidos.json"
     },
-    # --- NOVO MODELO CUSTOMIZADO DE VIAGEM ---
     "kaura-custom-viagem-v4": {
         "description": "Extração de Campos Customizados de Viagem (Neural v4).",
         "path": "dados/documento_viagem_teste.pdf", # Crie um novo PDF de teste nesta pasta
@@ -659,7 +658,7 @@ MODEL_CONFIG = {
             "Valor_Total_Aprovado": "Valor Total",
             "Status_de_Aprovacao": "Status de Aprovação"
         },
-        "output_file": "dados_viagem_extraidos.json" 
+        "output_file": "outputs/dados_viagem_extraidos.json" 
     }
 }
 # ... (resto do código) ...
