@@ -1,1 +1,7 @@
-criando o arquivo vazio
+# Core Function App SDK
+azure-functions
+# Para interagir com o Azure AI Speech
+azure-cognitiveservices-speech
+# Para interagir com o Key Vault de forma segura (via MI)
+azure-identity
+azure-keyvault-secrets
