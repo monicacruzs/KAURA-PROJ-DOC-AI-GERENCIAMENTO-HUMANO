@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AZURE_FUNCTION_HTTP_TRIGGER_AUTH_LEVEL": "function"
+    // Nota: Para testar localmente a leitura do Key Vault, você precisaria
+    // de um login prévio no Azure CLI e talvez de variáveis adicionais aqui.
+    // No entanto, para o deployment no Azure, estes valores são suficientes.
+  }
+}
