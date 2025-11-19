@@ -3,3 +3,4 @@ azure-ai-formrecognizer
 # Dependências para acesso ao Azure Key Vault
 azure-keyvault-secrets
 azure-identity
+# Novo teste de deployment
