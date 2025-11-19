@@ -5,4 +5,4 @@ azure-cognitiveservices-speech
 # Para interagir com o Key Vault de forma segura (via MI)
 azure-identity
 azure-keyvault-secrets
-# Testando o deploy do speech services
+
