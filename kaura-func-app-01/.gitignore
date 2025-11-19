@@ -1,1 +1,15 @@
-criando o arquivo vazio
+# Configurações sensíveis (chave de storage, etc.)
+local.settings.json
+
+# Ambiente virtual Python
+.venv/
+
+# Cache de execução do Python
+__pycache__
+
+# Log do Azure Functions Core Tools
+.funcignore
+
+# Arquivos de deployment do Azure
+/bin
+/obj
