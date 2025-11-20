@@ -68,10 +68,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     logging.info('Python HTTP trigger function (KAURA-SPEECH-REC) processed a request.')
 
     # --- 1. Obter Credenciais de Forma Segura (MI -> Key Vault) ---
-    #speech_key, speech_region = get_speech_credentials()
-    # NO SEU CODIGO PYTHON TEMPORARIAMENTE:
-    speech_key = "FQcGYXxcR3jpm8vZ3WRxP21jRHBG3hvN8xPz0N4f8djXBzRqqhAEJQQJ99BKACZoyfiXJ3w3AAAYACOGxWyt" 
-    speech_region = "brazilsouth"
+    speech_key, speech_region = get_speech_credentials()
     if not speech_key:
         return func.HttpResponse(
              "Erro na configuração de segurança: Falha ao obter credenciais do Key Vault.",
